@@ -148,8 +148,7 @@ export function renderEncryption(container) {
 function buildTerminalCommands(password) {
   const secret = shellQuote(password);
   const input = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}"`;
-  const temporaryOutput = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}.enc.tmp"`;
-  const encryptedCopy = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}.enc"`;
+  const temporaryOutput = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}.enc"`;
 
   return {
     checkCommand: 'openssl version',

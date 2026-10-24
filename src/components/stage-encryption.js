@@ -39,7 +39,7 @@ export function renderEncryption(container) {
         </div>
         <div class="panel-body">
           <div class="folder-field-label">1. Download the practice file</div>
-          <a class="btn-primary-confirm" href="./${COURSE_OUTLINE_FILE}" download>
+          <a class="btn-primary-confirm" href="./${COURSE_OUTLINE_FILE}" download="${COURSE_OUTLINE_FILE}" id="download-course-outline">
             Download ${COURSE_OUTLINE_FILE}
           </a>
           <p class="text-xs text-muted mt-1">
@@ -96,6 +96,31 @@ export function renderEncryption(container) {
       ` : ''}
     </div>
   `;
+
+  const downloadLink = container.querySelector('#download-course-outline');
+  downloadLink?.addEventListener('click', async (event) => {
+    event.preventDefault();
+
+    try {
+      const response = await fetch(downloadLink.href);
+      if (!response.ok) {
+        throw new Error(`Download failed with status ${response.status}`);
+      }
+
+      const fileBlob = await response.blob();
+      const blobUrl = URL.createObjectURL(fileBlob);
+      const temporaryLink = document.createElement('a');
+      temporaryLink.href = blobUrl;
+      temporaryLink.download = COURSE_OUTLINE_FILE;
+      document.body.appendChild(temporaryLink);
+      temporaryLink.click();
+      temporaryLink.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Course outline download failed:', error);
+      window.alert('The course outline could not be downloaded. Please try again.');
+    }
+  });
 
   const generateBtn = container.querySelector('#btn-generate-encryption-guide');
   generateBtn?.addEventListener('click', () => {

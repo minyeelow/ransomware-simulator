@@ -316,15 +316,16 @@ class StateStore {
   }
 
   // Initial Access Actions
-  triggerInitialAccess(vector = 'phishing') {
-    this.state.initialAccess.selectedVector = vector;
-    this.state.initialAccess.phishingOpened = true;
+  triggerInitialAccess(softwareName = 'Adobe Photoshop 2026') {
+    this.state.initialAccess.downloadedSoftware = softwareName;
     this.state.initialAccess.macroTriggered = true;
     this.state.initialAccess.c2Connected = true;
     this.state.targetHost.health = 'INFILTRATED';
     this.state.stagesCompleted['initial-access'] = true;
-    this.addTelemetry('Sysmon', 'WARN', 'Event ID 1: Process Creation: WINWORD.EXE spawned powershell.exe -w hidden -enc JABjA...');
-    this.addTelemetry('Network', 'ALERT', `Outbound TCP beacon established to C2: ${this.state.initialAccess.c2Server}`);
+    const sanitizedName = softwareName.replace(/[^a-zA-Z0-9]/g, '_');
+    this.addTelemetry('Browser', 'WARN', `Downloaded trial lure: ${sanitizedName}_Setup.exe (Trojanized Ingress)`);
+    this.addTelemetry('Sysmon', 'WARN', `Event ID 1: Process Creation: ${sanitizedName}_Setup.exe spawned powershell.exe -w hidden -enc JABjA...`);
+    this.addTelemetry('Network', 'ALERT', `Outbound reverse TLS beacon established to C2: ${this.state.initialAccess.c2Server}`);
     this.notify();
   }
 

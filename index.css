@@ -2640,3 +2640,325 @@ body::before {
   border-color: var(--accent-cyan);
   color: #38BDF8;
 }
+
+/* ==========================================================================
+   ADOBE FREE TRIALS CATALOGUE (INITIAL ACCESS LURE)
+   ========================================================================== */
+.adobe-stage-banner {
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: 8px;
+  padding: 10px 16px;
+}
+
+.adobe-hero-card {
+  background: linear-gradient(135deg, #1C1917 0%, #0F0E0E 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.adobe-brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 800px) {
+  .adobe-brand-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.adobe-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.adobe-red-box {
+  width: 44px;
+  height: 44px;
+  background: #EB1000;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(235, 16, 0, 0.4);
+}
+
+.adobe-logo-letter {
+  color: #FFFFFF;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.adobe-portal-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.3px;
+}
+
+.adobe-portal-sub {
+  font-size: 12px;
+  color: #A8A29E;
+}
+
+.adobe-promo-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 5px 12px;
+  background: rgba(235, 16, 0, 0.12);
+  border: 1px solid rgba(235, 16, 0, 0.35);
+  color: #F87171;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+.adobe-headline-text {
+  font-size: 13px;
+  color: #D6D3D1;
+  line-height: 1.6;
+  max-width: 800px;
+  margin-bottom: 16px;
+}
+
+/* Adobe Filter Tabs */
+.adobe-filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 14px;
+}
+
+.adobe-tab {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #A8A29E;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.adobe-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.adobe-tab.active {
+  background: #EB1000;
+  color: #FFFFFF;
+  border-color: #EB1000;
+  box-shadow: 0 0 12px rgba(235, 16, 0, 0.35);
+}
+
+/* Ingress Alert Card */
+.ingress-alert-card {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1px solid rgba(220, 38, 38, 0.5);
+  border-radius: 10px;
+  padding: 18px 22px;
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.25);
+}
+
+.ingress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ingress-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #F87171;
+}
+
+.ingress-title {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.ingress-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Adobe Catalogue Cards Grid */
+.adobe-catalogue-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 1100px) {
+  .adobe-catalogue-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .adobe-catalogue-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.adobe-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  transition: all var(--trans-base);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.adobe-card:hover {
+  border-color: rgba(235, 16, 0, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.adobe-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.adobe-app-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.app-code {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.adobe-card-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.adobe-badge-pill {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: var(--text-secondary);
+}
+
+.adobe-version {
+  font-size: 10px;
+}
+
+.adobe-card-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.adobe-category-label {
+  margin-top: 2px;
+}
+
+.adobe-card-desc {
+  line-height: 1.5;
+  min-height: 40px;
+}
+
+.adobe-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.adobe-feature-item {
+  color: #CBD5E1;
+}
+
+.feature-bullet {
+  color: var(--accent-cyan);
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.adobe-card-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.adobe-installer-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-download-adobe-trial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #EB1000 0%, #C40D00 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+  box-shadow: 0 2px 10px rgba(235, 16, 0, 0.3);
+}
+
+.btn-download-adobe-trial:hover {
+  background: linear-gradient(135deg, #FF2617 0%, #D40F00 100%);
+  box-shadow: 0 4px 16px rgba(235, 16, 0, 0.5);
+  transform: translateY(-1px);
+}
+
+.download-icon {
+  width: 14px;
+  height: 14px;
+}

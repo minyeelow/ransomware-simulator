@@ -47,8 +47,8 @@ const actions = {
     store.notify();
   },
 
-  onTriggerAccess: () => {
-    store.triggerInitialAccess(store.state.initialAccess.selectedVector);
+  onTriggerAccess: (softwareName) => {
+    store.triggerInitialAccess(softwareName || 'Adobe Photoshop 2026');
   },
 
   onTriggerPrivEsc: () => {

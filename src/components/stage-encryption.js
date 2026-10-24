@@ -8,8 +8,9 @@ import { sound } from '../sound.js';
 export function renderEncryption(container) {
   const values = container._encryptionGuide || {
     targetFile: '',
-    password: '',
-    commands: ''
+    password: 'ProfPleaseGiveUsA+',
+    checkCommand: '',
+    encryptionCommand: ''
   };
 
   container.innerHTML = `
@@ -60,8 +61,8 @@ export function renderEncryption(container) {
             type="password"
             id="encryption-password"
             class="folder-path-input font-mono"
-            value="${escapeHtml(values.password)}"
-            placeholder="Enter a strong password"
+            value="${escapeHtml(values.password || 'ProfPleaseGiveUsA+')}"
+            placeholder="Enter a strong password or use the default"
             aria-label="Encryption password"
           />
           <p class="text-xs text-muted mt-1">
@@ -74,60 +75,33 @@ export function renderEncryption(container) {
         </div>
       </div>
 
-      ${values.commands ? `
+      ${values.checkCommand && values.encryptionCommand ? `
         <div class="cyber-panel mt-3 animate-fade-in">
           <div class="panel-header">
             <div class="panel-title">
               <span class="panel-icon">📋</span>
               <span>Step-by-step terminal instructions</span>
             </div>
-            <button type="button" class="btn-primary-confirm" id="btn-copy-encryption-guide">Copy commands</button>
           </div>
           <div class="panel-body">
             <ol class="guide-steps">
               <li>Open Terminal on macOS/Linux, or use a shell with OpenSSL installed.</li>
-              <li>Paste the encryption command below. It creates a new <code>.aes256</code> file and preserves the original.</li>
-              <li>Keep the password safe. You need the same password to decrypt the protected copy.</li>
-              <li>Use the final command only when you intentionally want to restore a copy.</li>
+              <li>Run the check command first, then run the encryption command.</li>
+              <li>The encryption command creates a new <code>.aes256</code> file and preserves the original.</li>
             </ol>
-            <textarea
-              id="encryption-command-output"
-              class="cyber-textarea font-mono"
-              rows="9"
-              readonly
-              aria-label="Generated terminal commands"
-            >${escapeHtml(values.commands)}</textarea>
-            <div class="text-xs text-amber mt-2">
-              Warning: commands containing passwords may be visible in terminal
-              history. For important data, use a password prompt instead.
+            <div class="folder-field-label mt-2">1. Check that OpenSSL is installed</div>
+            <div class="code-copy-row">
+              <textarea id="openssl-check-command" class="cyber-textarea font-mono" rows="2" readonly aria-label="OpenSSL check command">${escapeHtml(values.checkCommand)}</textarea>
+              <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="openssl-check-command">Copy</button>
+            </div>
+            <div class="folder-field-label mt-2">2. Encrypt the selected file</div>
+            <div class="code-copy-row">
+              <textarea id="encryption-command" class="cyber-textarea font-mono" rows="3" readonly aria-label="File encryption command">${escapeHtml(values.encryptionCommand)}</textarea>
+              <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="encryption-command">Copy</button>
             </div>
           </div>
         </div>
       ` : ''}
-
-      <div class="cyber-panel defense-panel mt-3">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span class="panel-icon">🛡️</span>
-            <span>Safe file-protection practices</span>
-          </div>
-          <span class="defense-badge font-mono">AES-256-GCM ALTERNATIVE</span>
-        </div>
-        <div class="panel-body defense-body">
-          <div class="defense-card">
-            <div class="defense-title">Protect a copy first</div>
-            <div class="defense-desc">Verify the output file opens correctly before moving or deleting any original data.</div>
-          </div>
-          <div class="defense-card">
-            <div class="defense-title">Use a unique password</div>
-            <div class="defense-desc">A strong, unique password is the practical decryption key. If it is lost, recovery may not be possible.</div>
-          </div>
-          <div class="defense-card">
-            <div class="defense-title">Check OpenSSL availability</div>
-            <div class="defense-desc">Run <code>openssl version</code> before using the generated commands.</div>
-          </div>
-        </div>
-      </div>
     </div>
   `;
 
@@ -144,7 +118,8 @@ export function renderEncryption(container) {
     container._encryptionGuide = {
       targetFile: selectedFile.name,
       password: container.querySelector('#encryption-password')?.value || '',
-      commands: ''
+      checkCommand: '',
+      encryptionCommand: ''
     };
     sound.playClick();
     renderEncryption(container);
@@ -163,15 +138,15 @@ export function renderEncryption(container) {
     container._encryptionGuide = {
       targetFile,
       password,
-      commands: buildTerminalCommands(targetFile, password)
+      ...buildTerminalCommands(targetFile, password)
     };
     sound.playClick();
     renderEncryption(container);
   });
 
-  const copyBtn = container.querySelector('#btn-copy-encryption-guide');
-  copyBtn?.addEventListener('click', async () => {
-    const output = container.querySelector('#encryption-command-output');
+  container.querySelectorAll('.copy-command-btn').forEach((copyBtn) => {
+    copyBtn.addEventListener('click', async () => {
+    const output = container.querySelector(`#${copyBtn.dataset.copyTarget}`);
     if (!output) return;
 
     try {
@@ -183,6 +158,7 @@ export function renderEncryption(container) {
       copyBtn.textContent = 'Select and copy';
       console.warn('Clipboard access was unavailable:', error);
     }
+    });
   });
 }
 
@@ -191,14 +167,10 @@ function buildTerminalCommands(targetFile, password) {
   const output = shellQuote(`${targetFile}.aes256`);
   const secret = shellQuote(password);
 
-  return `# Check that OpenSSL is installed
-openssl version
-
-# Encrypt one file with AES-256-CBC and PBKDF2
-openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in ${input} -out ${output} -pass pass:${secret}
-
-# Decrypt the protected copy when needed
-openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in ${output} -out ${input}.decrypted -pass pass:${secret}`;
+  return {
+    checkCommand: 'openssl version',
+    encryptionCommand: `openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in ${input} -out ${output} -pass pass:${secret}`
+  };
 }
 
 function shellQuote(value) {

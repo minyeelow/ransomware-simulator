@@ -155,7 +155,7 @@ function buildTerminalCommands(password) {
     protectCommands: [
   `openssl enc -aes-256-cbc -pbkdf2 -salt -pass pass:${secret} -in ${input} -out ${temporaryOutput}`,
   `test -s ${temporaryOutput} || { rm -f ${temporaryOutput}; echo "ENCRYPTION FAILED"; exit 1; }`,
-  `mv -f ${temporaryOutput} ${input}`
+  `rm -f ${input} && mv ${temporaryOutput} ${input}`
 ]
   };
 }

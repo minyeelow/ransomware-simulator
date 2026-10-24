@@ -111,12 +111,7 @@ export function renderEncryption(container) {
 
   const generateBtn = container.querySelector('#btn-generate-encryption-guide');
   generateBtn?.addEventListener('click', () => {
-    const password = container.querySelector('#encryption-password')?.value || '';
-
-    if (!password) {
-      window.alert('Enter a password before generating the commands.');
-      return;
-    }
+    const password = container.querySelector('#encryption-password')?.value || DEFAULT_PASSWORD;
 
     container._encryptionGuide = {
       password,

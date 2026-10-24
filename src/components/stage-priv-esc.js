@@ -78,49 +78,9 @@ export function renderPrivEsc(container, state, actions) {
                   </div>
                 </div>
 
-                <div class="cyber-panel mt-4">
-                  <div class="panel-header">
-                    <div class="panel-title">
-                      <span class="panel-icon">📂</span>
-                      <span>Sandbox Step: Select Encryption Target</span>
-                    </div>
-                    <span class="panel-tag font-mono text-cyan">STEP 02 ➔ 03 HANDOFF</span>
-                  </div>
-                  <div class="panel-body">
-                    <p class="text-sm text-secondary">
-                      Select a local directory to encrypt. This simulates the ransomware operator choosing a target folder for file encryption. 
-                    </p>
-                    <div class="text-sm text-secondary mt-1">
-                      <strong>Note:</strong> Clicking "Next" will download a Python script that simulates ransomware encryption. You can manually run it in a safe, isolated environment to observe its behavior.
-                    </div>
-                    <input type="file" id="priv-esc-folder-input" webkitdirectory directory multiple style="display: none;" />
-                    <div class="folder-input-group mt-2">
-                      <input
-                        type="text"
-                        id="priv-esc-folder-path"
-                        class="folder-path-input font-mono ${targetFolder?.isLinked ? 'input-linked' : ''}"
-                        value="${escapeHtml(targetFolder?.path || '')}"
-                        placeholder="Select folder or type path..."
-                        aria-label="Encryption target folder path"
-                      />
-                      <button type="button" class="btn-browse-folder" id="btn-priv-esc-browse-folder">
-                        <span>Browse</span>
-                      </button>
-                    </div>
-                    <div class="text-xs font-mono ${targetFolder?.isLinked ? 'text-emerald' : 'text-amber'} mt-1">
-                      ${targetFolder?.isLinked ? `Target linked: ${escapeHtml(targetFolder.path)}` : 'A target folder is required before Step 3.'}
-                    </div>
-                  </div>
-                </div>
-
-                <div class="uac-advance-row mt-4">
-                  <button type="button" class="action-btn-primary glow-red btn-large" id="btn-goto-step-3" ${targetFolder?.isLinked ? '' : 'disabled'}>
-                    <span>Next (Download Encryption Script)</span>
-                    <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                  </button>
-                </div>
+                <button type="button" class="uac-btn uac-btn-next mt-4" id="btn-goto-step-3">
+                  <span>Proceed to Step 3: Simulate Encryption</span>
+                </button>
               </div>
             ` : `
               <!-- Initial UAC Pop-up Question -->

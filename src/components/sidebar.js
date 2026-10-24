@@ -1,17 +1,17 @@
 /**
  * Sidebar Component
  * Features:
- * 1. Target Folder Pointer (top left): allows users to indicate a local folder on their computer via text path pointer (no upload).
+ * 1. Target Folder Pointer (top left): Opens native OS directory chooser (Finder / Explorer) without uploading files.
  * 2. Ransomware Steps Progress Indicator (non-clickable progress bar showing which step the user is seeing right now).
  * 3. Kill chain controls (Auto-Run, Reset, Sound toggle).
  */
 import { STAGES } from '../state.js';
 import { sound } from '../sound.js';
+import { openLocalDirectoryPicker } from '../folderPicker.js';
 
 export function renderSidebar(container, state, actions) {
   const isLinked = state.targetFolder?.isLinked || false;
   const currentStageIndex = STAGES.findIndex(s => s.id === state.currentStageId);
-  const completedCount = Object.values(state.stagesCompleted).filter(Boolean).length;
   
   // Progress calculation
   let progressPct = 0;
@@ -30,6 +30,9 @@ export function renderSidebar(container, state, actions) {
 
   container.innerHTML = `
     <aside class="sidebar-wrapper" id="sidebar" role="region" aria-label="Ransomware Simulator Navigation">
+      <!-- Hidden Fallback Input for Browser Folder Picker -->
+      <input type="file" id="sidebar-fallback-folder-input" webkitdirectory directory multiple style="display: none;" />
+
       <!-- App Header & Logo -->
       <div class="sidebar-brand">
         <div class="brand-icon-wrapper">
@@ -59,26 +62,29 @@ export function renderSidebar(container, state, actions) {
 
         <div class="folder-pointer-body">
           <label class="folder-field-label font-mono text-xs text-muted" for="sidebar-folder-path-input">
-            ${isLinked ? 'Linked Directory Pointer:' : 'Indicate Local Directory Path:'}
+            ${isLinked ? 'Linked Directory Pointer:' : 'Select or Point to Local Directory:'}
           </label>
 
-          <!-- Path Input & Link Button -->
+          <!-- Path Input & Browse Button -->
           <div class="folder-input-group">
             <input 
               type="text" 
               class="folder-path-input font-mono ${isLinked ? 'input-linked' : ''}" 
               id="sidebar-folder-path-input" 
               value="${escapeHtml(folder.path)}" 
-              placeholder="e.g. C:\\Users\\Name\\Documents" 
-              title="Enter or edit your local directory path"
+              placeholder="Select folder or type path..." 
+              title="Local folder path"
             />
             <button 
               type="button" 
-              class="btn-link-folder ${isLinked ? 'btn-linked' : ''}" 
-              id="btn-sidebar-link-folder" 
-              title="${isLinked ? 'Change or update directory path' : 'Link this local folder pointer'}"
+              class="btn-browse-folder" 
+              id="btn-sidebar-browse-folder" 
+              title="Open your computer's native folder dialog"
             >
-              <span>${isLinked ? 'Update' : 'Link'}</span>
+              <svg class="folder-browse-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
+              </svg>
+              <span>Browse</span>
             </button>
           </div>
 
@@ -87,13 +93,13 @@ export function renderSidebar(container, state, actions) {
             <div class="folder-meta-row">
               <span class="folder-meta-label">Folder Name:</span>
               <span class="folder-meta-val ${isLinked ? 'text-highlight' : 'text-muted'}" id="sidebar-folder-name">
-                ${isLinked ? folder.name : 'None specified'}
+                ${isLinked ? folder.name : 'None selected'}
               </span>
             </div>
             <div class="folder-meta-row">
               <span class="folder-meta-label">Status:</span>
               <span class="folder-meta-val ${isLinked ? 'text-emerald' : 'text-amber'}">
-                ${isLinked ? 'Pointed (Ready for Step 1)' : 'Required before Step 1'}
+                ${isLinked ? 'Pointed (Ready for Step 1)' : 'Click Browse to open dialog'}
               </span>
             </div>
           </div>
@@ -200,28 +206,31 @@ export function renderSidebar(container, state, actions) {
       .replace(/>/g, '&gt;');
   }
 
-  // Folder pointer interaction handlers
-  const linkBtn = container.querySelector('#btn-sidebar-link-folder');
+  // Browse button -> Opens Native OS Directory Chooser Dialog
+  const browseBtn = container.querySelector('#btn-sidebar-browse-folder');
+  const fallbackInput = container.querySelector('#sidebar-fallback-folder-input');
   const pathInput = container.querySelector('#sidebar-folder-path-input');
 
-  const executeLink = () => {
-    const rawPath = pathInput ? pathInput.value.trim() : '';
-    if (rawPath) {
+  if (browseBtn) {
+    browseBtn.addEventListener('click', async () => {
       sound.playClick();
-      actions.onLinkFolder(rawPath);
-    } else if (pathInput) {
-      pathInput.focus();
-    }
-  };
-
-  if (linkBtn) {
-    linkBtn.addEventListener('click', executeLink);
+      const result = await openLocalDirectoryPicker(fallbackInput);
+      if (result && result.path) {
+        sound.playStageChange();
+        actions.onLinkFolder(result.path);
+      }
+    });
   }
 
+  // Manual enter in path input
   if (pathInput) {
     pathInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        executeLink();
+        const val = pathInput.value.trim();
+        if (val) {
+          sound.playClick();
+          actions.onLinkFolder(val);
+        }
       }
     });
   }

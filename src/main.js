@@ -32,6 +32,20 @@ const actions = {
     store.setCurrentStage(stageId);
   },
 
+  onFolderSelected: (fileList) => {
+    store.setFolderFromLocalFiles(fileList);
+  },
+
+  onSetFolderPath: (rawPath) => {
+    const segments = rawPath.replace(/\\/g, '/').split('/').filter(Boolean);
+    const folderName = segments.length > 0 ? segments[segments.length - 1] : 'TargetFolder';
+    store.setTargetFolder({
+      path: rawPath,
+      name: folderName,
+      isCustom: true
+    });
+  },
+
   onSelectVector: (vector) => {
     store.state.initialAccess.selectedVector = vector;
     store.notify();
@@ -134,6 +148,11 @@ function delay(ms) {
 
 // Master Render Function
 function renderApp(state) {
+  const topScopeEl = document.getElementById('top-nav-scope');
+  if (topScopeEl && state.targetFolder) {
+    topScopeEl.textContent = `TARGET DIR: ${state.targetFolder.path}`;
+  }
+
   if (sidebarEl) {
     renderSidebar(sidebarEl, state, actions);
   }

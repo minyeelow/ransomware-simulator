@@ -226,111 +226,156 @@ body::before {
   color: var(--text-muted);
 }
 
-/* Target Host Status Card */
-.host-status-card {
-  margin: 16px 16px 12px 16px;
+/* ==========================================================================
+   TARGET FOLDER POINTER (Replaces Host Status Bar)
+   ========================================================================== */
+.folder-pointer-card {
+  margin: 14px 16px 12px 16px;
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-medium);
   border-radius: 8px;
   padding: 12px 14px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
-.host-card-header {
+.folder-card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  justify-content: space-between;
+  margin-bottom: 10px;
 }
 
-.host-indicator-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent-emerald);
-  box-shadow: 0 0 8px var(--accent-emerald);
-  animation: pulse 2s infinite;
+.folder-header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.host-card-title {
-  font-family: var(--font-mono);
+.folder-icon {
+  font-size: 14px;
+}
+
+.folder-card-title {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.8px;
   color: var(--text-secondary);
 }
 
-.host-details {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.host-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-}
-
-.host-label {
-  color: var(--text-muted);
-}
-
-.host-val {
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.host-badge {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 7px;
+.folder-status-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
   border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
 }
 
-.health-secure {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34D399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.health-warn {
-  background: rgba(245, 158, 11, 0.15);
-  color: #FBBF24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.health-alert {
-  background: rgba(239, 68, 68, 0.2);
-  color: #F87171;
-  border: 1px solid rgba(239, 68, 68, 0.4);
-}
-
-.health-critical {
-  background: rgba(220, 38, 38, 0.3);
-  color: #EF4444;
-  border: 1px solid rgba(220, 38, 38, 0.6);
-  animation: pulseRed 1.2s infinite;
-}
-
-.health-extorted {
-  background: rgba(168, 85, 247, 0.2);
-  color: #C084FC;
-  border: 1px solid rgba(168, 85, 247, 0.4);
-}
-
-.health-recovered {
-  background: rgba(6, 182, 212, 0.15);
-  color: #38BDF8;
+.badge-default {
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--accent-cyan);
   border: 1px solid rgba(6, 182, 212, 0.3);
 }
 
-/* Stepper Section */
+.badge-custom {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-emerald);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.folder-pointer-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.folder-field-label {
+  letter-spacing: 0.4px;
+}
+
+.folder-input-group {
+  display: flex;
+  gap: 6px;
+}
+
+.folder-path-input {
+  flex: 1;
+  background: var(--bg-darkest);
+  border: 1px solid var(--border-medium);
+  border-radius: 5px;
+  padding: 6px 10px;
+  color: var(--text-primary);
+  font-size: 11px;
+  min-width: 0;
+  transition: border-color var(--trans-fast);
+}
+
+.folder-path-input:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan-glow);
+}
+
+.btn-browse-folder {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  color: #38BDF8;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--trans-fast);
+}
+
+.btn-browse-folder:hover {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.35) 0%, rgba(15, 23, 42, 1) 100%);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px var(--accent-cyan-glow);
+}
+
+.folder-browse-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.folder-meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.folder-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.folder-meta-label {
+  color: var(--text-muted);
+}
+
+.folder-meta-val {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+/* ==========================================================================
+   STEPPER PROGRESS BAR & STEP INDICATORS (Non-clickable progress tracker)
+   ========================================================================== */
 .stepper-section {
   flex: 1;
   padding: 8px 16px;
@@ -354,9 +399,9 @@ body::before {
 }
 
 .stepper-progress-text {
-  font-family: var(--font-mono);
   font-size: 10px;
   color: var(--accent-cyan);
+  font-weight: 600;
 }
 
 .killchain-progress-track {
@@ -374,14 +419,14 @@ body::before {
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Nav List of 5 Steps */
-.steps-nav-list {
+/* Steps Progress List (Visual step indicator, not clickable buttons) */
+.steps-progress-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.step-item-btn {
+.step-progress-item {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -389,32 +434,44 @@ body::before {
   border-radius: 8px;
   background: transparent;
   border: 1px solid transparent;
-  cursor: pointer;
+  cursor: default; /* Non-clickable */
   text-align: left;
   transition: all var(--trans-base);
   position: relative;
   width: 100%;
+  user-select: none;
 }
 
-.step-item-btn:hover {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: var(--border-subtle);
-  transform: translateX(2px);
-}
-
-.step-item-btn.active {
+.step-progress-item.active {
   background: linear-gradient(90deg, rgba(6, 182, 212, 0.12) 0%, rgba(15, 23, 42, 0.6) 100%);
   border-color: rgba(6, 182, 212, 0.4);
-  box-shadow: inset 3px 0 0 var(--accent-cyan), 0 2px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 3px 0 0 var(--accent-cyan), 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
-.step-item-btn.completed {
+.step-progress-item.completed {
   border-color: rgba(16, 185, 129, 0.2);
-}
-
-.step-item-btn.completed:not(.active) {
   background: rgba(16, 185, 129, 0.03);
 }
+
+.step-active-pip {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan);
+  animation: pulse 1.5s infinite;
+}
+
+.badge-upcoming {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+}
+
+
 
 .step-num-bubble {
   width: 28px;

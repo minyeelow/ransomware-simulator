@@ -1,28 +1,28 @@
 /**
  * Sidebar Component
- * Renders the ransomware kill chain steps, status, host profile, and simulation controls.
+ * Features:
+ * 1. Target Folder Pointer (top left): allows users to indicate a local folder on their computer via directory picker or path input.
+ * 2. Ransomware Steps Progress Indicator (non-clickable progress bar showing which step the user is seeing right now).
+ * 3. Kill chain controls (Auto-Run, Reset, Sound toggle).
  */
 import { STAGES } from '../state.js';
 import { sound } from '../sound.js';
 
 export function renderSidebar(container, state, actions) {
   const currentStage = STAGES.find(s => s.id === state.currentStageId) || STAGES[0];
+  const currentStageIndex = STAGES.findIndex(s => s.id === state.currentStageId);
   const completedCount = Object.values(state.stagesCompleted).filter(Boolean).length;
-  const progressPct = Math.round((completedCount / STAGES.length) * 100);
+  const progressPct = Math.round(((currentStageIndex + 1) / STAGES.length) * 100);
 
-  // Health status visual styles
-  const healthBadgeMap = {
-    'SECURE': { text: 'Nominal / Monitored', class: 'health-secure', color: 'var(--accent-emerald)' },
-    'INFILTRATED': { text: 'Footprint Established', class: 'health-warn', color: 'var(--accent-amber)' },
-    'PRIV_ELEVATED': { text: 'SYSTEM Rooted', class: 'health-alert', color: 'var(--accent-red)' },
-    'ENCRYPTING': { text: 'Cryptographic Lock', class: 'health-critical', color: 'var(--accent-crimson)' },
-    'COMPROMISED': { text: 'Double Extortion Active', class: 'health-extorted', color: 'var(--accent-purple)' },
-    'RESTORED': { text: 'Remediated & Verified', class: 'health-recovered', color: 'var(--accent-cyan)' }
+  const folder = state.targetFolder || {
+    path: 'C:\\Users\\Victim\\Documents\\ConfidentialData',
+    name: 'ConfidentialData',
+    filesCount: 6,
+    isCustom: false
   };
-  const hostHealth = healthBadgeMap[state.targetHost.health] || healthBadgeMap.SECURE;
 
   container.innerHTML = `
-    <aside class="sidebar-wrapper" id="sidebar" role="navigation" aria-label="Ransomware Kill Chain Steps">
+    <aside class="sidebar-wrapper" id="sidebar" role="region" aria-label="Ransomware Simulator Navigation">
       <!-- App Header & Logo -->
       <div class="sidebar-brand">
         <div class="brand-icon-wrapper">
@@ -38,65 +38,105 @@ export function renderSidebar(container, state, actions) {
         </div>
       </div>
 
-      <!-- Target Host Telemetry Card -->
-      <div class="host-status-card" id="host-status-card">
-        <div class="host-card-header">
-          <div class="host-indicator-dot"></div>
-          <span class="host-card-title">TARGET NODE STATUS</span>
+      <!-- Target Folder Pointer (Replaces Target Node Status) -->
+      <div class="folder-pointer-card" id="folder-pointer-card">
+        <div class="folder-card-header">
+          <div class="folder-header-title-group">
+            <span class="folder-icon">📁</span>
+            <span class="folder-card-title font-mono">TARGET FOLDER POINTER</span>
+          </div>
+          <span class="folder-status-badge ${folder.isCustom ? 'badge-custom' : 'badge-default'} font-mono">
+            ${folder.isCustom ? 'LOCAL LINKED' : 'READY'}
+          </span>
         </div>
-        <div class="host-details">
-          <div class="host-row">
-            <span class="host-label">Hostname</span>
-            <span class="host-val font-mono" title="${state.targetHost.hostname}">${state.targetHost.hostname.split('.')[0]}</span>
+
+        <div class="folder-pointer-body">
+          <label class="folder-field-label font-mono text-xs text-muted" for="folder-path-input">
+            Indicate Local Directory:
+          </label>
+
+          <!-- Path Input & Browse Button -->
+          <div class="folder-input-group">
+            <input 
+              type="text" 
+              class="folder-path-input font-mono" 
+              id="folder-path-input" 
+              value="${folder.path}" 
+              placeholder="/path/to/local/folder" 
+              title="Type or edit local directory path"
+            />
+            <button 
+              type="button" 
+              class="btn-browse-folder" 
+              id="btn-trigger-folder-picker" 
+              title="Browse and select a folder from your local computer"
+            >
+              <svg class="folder-browse-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
+              </svg>
+              <span>Browse</span>
+            </button>
+            <!-- Hidden Native Folder Picker -->
+            <input 
+              type="file" 
+              id="native-folder-input" 
+              webkitdirectory 
+              directory 
+              multiple 
+              style="display: none;" 
+            />
           </div>
-          <div class="host-row">
-            <span class="host-label">Integrity</span>
-            <span class="host-val font-mono">${state.targetHost.integrityLevel}</span>
-          </div>
-          <div class="host-row">
-            <span class="host-label">Threat Level</span>
-            <span class="host-badge ${hostHealth.class}">${hostHealth.text}</span>
+
+          <!-- Folder Meta & Target Summary -->
+          <div class="folder-meta-grid font-mono text-xs">
+            <div class="folder-meta-row">
+              <span class="folder-meta-label">Folder Name:</span>
+              <span class="folder-meta-val text-highlight" id="folder-display-name">${folder.name}</span>
+            </div>
+            <div class="folder-meta-row">
+              <span class="folder-meta-label">Files Targeted:</span>
+              <span class="folder-meta-val text-cyan" id="folder-display-count">${folder.filesCount} files</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Kill Chain Stepper Section -->
+      <!-- Kill Chain Stepper Section (Progress Bar & Non-Clickable Step Tracker) -->
       <div class="stepper-section">
         <div class="stepper-header">
-          <span class="stepper-heading">RANSOMWARE STEPS</span>
-          <span class="stepper-progress-text">${completedCount} / 5 COMPLETE</span>
+          <span class="stepper-heading">RANSOMWARE PROGRESS</span>
+          <span class="stepper-progress-text font-mono">STEP ${currentStageIndex + 1} OF 5</span>
         </div>
 
-        <!-- Global Progress Bar -->
-        <div class="killchain-progress-track" title="Kill chain execution progress: ${progressPct}%">
+        <!-- Progress Track Bar -->
+        <div class="killchain-progress-track" title="Kill chain execution stage: Step ${currentStageIndex + 1} of 5">
           <div class="killchain-progress-fill" style="width: ${progressPct}%;"></div>
         </div>
 
-        <!-- The 5 Steps Nav List -->
-        <nav class="steps-nav-list" id="steps-nav-list" aria-label="Kill chain stages">
-          ${STAGES.map((stage) => {
+        <!-- The 5 Steps Progress List (Display only - not clickable tabs) -->
+        <div class="steps-progress-list" id="steps-progress-list" aria-label="Ransomware lifecycle progress steps">
+          ${STAGES.map((stage, idx) => {
             const isActive = stage.id === state.currentStageId;
             const isCompleted = state.stagesCompleted[stage.id];
             
-            // Determine step badge label
-            let badgeText = 'PENDING';
-            let badgeClass = 'badge-pending';
+            // Badge states
+            let badgeText = 'UPCOMING';
+            let badgeClass = 'badge-upcoming';
             if (isActive) {
-              badgeText = 'ACTIVE';
+              badgeText = 'NOW SHOWING';
               badgeClass = 'badge-active';
             } else if (isCompleted) {
-              badgeText = 'EXECUTED';
+              badgeText = 'COMPLETED';
               badgeClass = 'badge-done';
             }
 
             return `
-              <button 
-                type="button"
-                class="step-item-btn ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" 
+              <div 
+                class="step-progress-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" 
+                id="step-indicator-${stage.id}"
                 data-stage-id="${stage.id}"
-                id="step-nav-${stage.id}"
-                aria-current="${isActive ? 'step' : 'false'}"
               >
+                <!-- Number / Checkmark Badge -->
                 <div class="step-num-bubble">
                   ${isCompleted ? `
                     <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor">
@@ -104,6 +144,8 @@ export function renderSidebar(container, state, actions) {
                     </svg>
                   ` : `0${stage.num}`}
                 </div>
+
+                <!-- Step Description Details -->
                 <div class="step-meta">
                   <div class="step-meta-top">
                     <span class="step-name">${stage.title}</span>
@@ -112,10 +154,13 @@ export function renderSidebar(container, state, actions) {
                   <div class="step-sub">${stage.subtitle}</div>
                   <div class="step-mitre font-mono">${stage.mitreId}</div>
                 </div>
-              </button>
+
+                <!-- Active pulse bar on the right if current -->
+                ${isActive ? '<div class="step-active-pip"></div>' : ''}
+              </div>
             `;
           }).join('')}
-        </nav>
+        </div>
       </div>
 
       <!-- Sidebar Controls Footer -->
@@ -146,15 +191,43 @@ export function renderSidebar(container, state, actions) {
     </aside>
   `;
 
-  // Attach event listeners
-  container.querySelectorAll('.step-item-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      sound.playClick();
-      const stageId = btn.getAttribute('data-stage-id');
-      actions.onSelectStage(stageId);
-    });
-  });
+  // Folder pointer interaction handlers
+  const folderInput = container.querySelector('#native-folder-input');
+  const browseBtn = container.querySelector('#btn-trigger-folder-picker');
+  const pathInput = container.querySelector('#folder-path-input');
 
+  if (browseBtn && folderInput) {
+    browseBtn.addEventListener('click', () => {
+      sound.playClick();
+      folderInput.click();
+    });
+
+    folderInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        sound.playClick();
+        if (actions.onFolderSelected) {
+          actions.onFolderSelected(e.target.files);
+        }
+      }
+    });
+  }
+
+  if (pathInput) {
+    pathInput.addEventListener('change', (e) => {
+      const rawPath = e.target.value.trim();
+      if (rawPath && actions.onSetFolderPath) {
+        actions.onSetFolderPath(rawPath);
+      }
+    });
+
+    pathInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        pathInput.blur();
+      }
+    });
+  }
+
+  // Auto-Run and Reset Simulation buttons
   const runAllBtn = container.querySelector('#btn-run-full-simulation');
   if (runAllBtn) {
     runAllBtn.addEventListener('click', () => {

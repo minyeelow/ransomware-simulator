@@ -167,6 +167,13 @@ class StateStore {
         currentUser: 'MEGACORP\\jsmith (Std User)',
         integrityLevel: 'Medium'
       },
+      targetFolder: {
+        path: 'C:\\Users\\Victim\\Documents\\ConfidentialData',
+        name: 'ConfidentialData',
+        filesCount: 6,
+        isCustom: false,
+        files: []
+      },
       stagesCompleted: {
         'initial-access': false,
         'privilege-escalation': false,
@@ -251,6 +258,64 @@ class StateStore {
     if (this.state.currentStageId === stageId) return;
     this.state.currentStageId = stageId;
     this.addTelemetry('Navigation', 'INFO', `Switched view to step: ${stageId.toUpperCase()}`);
+    this.notify();
+  }
+
+  setTargetFolder(folderData) {
+    this.state.targetFolder = {
+      ...this.state.targetFolder,
+      ...folderData
+    };
+    this.addTelemetry('FileSystem', 'INFO', `Target folder pointer set to: ${this.state.targetFolder.path}`);
+    this.notify();
+  }
+
+  setFolderFromLocalFiles(fileList) {
+    if (!fileList || fileList.length === 0) return;
+    const firstFile = fileList[0];
+    let folderName = 'Selected Folder';
+    let path = 'Local System Folder';
+
+    if (firstFile.webkitRelativePath) {
+      const parts = firstFile.webkitRelativePath.split('/');
+      if (parts.length > 1) {
+        folderName = parts[0];
+        path = `[Local] /${folderName}`;
+      }
+    }
+
+    const files = Array.from(fileList).slice(0, 20).map((f) => ({
+      name: f.name,
+      size: (f.size / (1024 * 1024)).toFixed(2) + ' MB',
+      type: f.type || 'Data File'
+    }));
+
+    this.state.targetFolder = {
+      path: path,
+      name: folderName,
+      filesCount: fileList.length,
+      isCustom: true,
+      files: files
+    };
+
+    if (files.length > 0) {
+      this.state.encryption.files = files.slice(0, 6).map((f, idx) => ({
+        id: `f_custom_${idx}`,
+        name: f.name,
+        path: `${path}/${f.name}`,
+        size: f.size,
+        type: f.type,
+        status: 'clean',
+        progress: 0,
+        entropy: (3.2 + Math.random() * 1.5).toFixed(2),
+        originalHash: `SHA256: ${Math.random().toString(16).substring(2, 8)}...${Math.random().toString(16).substring(2, 6)}`,
+        currentHash: `SHA256: ${Math.random().toString(16).substring(2, 8)}...${Math.random().toString(16).substring(2, 6)}`,
+        plainPreview: '4C 6F 63 61 6C 20 44 61 | Local file data',
+        cipherPreview: 'A4 F9 21 D8 03 E7 BC 44 | AES-256 High Entropy'
+      }));
+    }
+
+    this.addTelemetry('FileSystem', 'SUCCESS', `Linked local directory: ${folderName} (${fileList.length} files detected)`);
     this.notify();
   }
 

@@ -8,7 +8,7 @@ import { sound } from '../sound.js';
 const COURSE_OUTLINE_FILE = 'IS613CourseOutline.pdf';
 const DEFAULT_PASSWORD = 'ProfPleaseGiveUsA+';
 
-export function renderEncryption(container) {
+export function renderEncryption(container, state, actions) {
   const values = container._encryptionGuide || {
     password: DEFAULT_PASSWORD,
     checkCommand: '',
@@ -87,6 +87,15 @@ export function renderEncryption(container) {
           </div>
         </div>
       ` : ''}
+
+      <div class="stage-footer-actions mt-3">
+        <button type="button" class="btn-next-step" id="btn-goto-step-4">
+          <span>Continue to Step 4: Ransom &amp; Extortion</span>
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 010-2h11.586l-2.293-2.293a1 1 0 011.414-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
     </div>
   `;
 
@@ -125,6 +134,12 @@ export function renderEncryption(container) {
     };
     sound.playClick();
     renderEncryption(container);
+  });
+
+  const gotoStep4Btn = container.querySelector('#btn-goto-step-4');
+  gotoStep4Btn?.addEventListener('click', () => {
+    sound.playStageChange();
+    actions?.onSelectStage('ransom');
   });
 
   container.querySelectorAll('.copy-command-btn').forEach((copyBtn) => {

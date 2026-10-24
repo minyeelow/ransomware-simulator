@@ -20,11 +20,9 @@ export function renderEncryption(container, state, actions) {
       <div class="stage-header-bar">
         <div class="stage-title-group">
           <div class="stage-eyebrow text-blue">STEP 03 OF 05 // FILE PROTECTION</div>
-          <h1 class="stage-main-title">Protect a Single File</h1>
+          <h1 class="stage-main-title">How The Encryption Process Works</h1>
           <p class="stage-description">
-            Generate local OpenSSL commands that use <strong>AES-256</strong> to
-            protect one file with a password. Nothing runs in the browser, and
-            the original file is never deleted or overwritten.
+            Let's use a practice file to demonstrate the encryption process. We've provided a sample PDF file for you to download and encrypt. In the real world, ransomware would encrypt your own files, but here we will only work with this practice file.
           </p>
         </div>
       </div>
@@ -43,7 +41,7 @@ export function renderEncryption(container, state, actions) {
             Download ${COURSE_OUTLINE_FILE}
           </a>
           <p class="text-xs text-muted mt-1">
-            Save the file to your Downloads folder so the generated command can find it.
+            Save the file to your Downloads folder so the generated command can find it. You can also open the PDF to verify that it is a valid file before proceeding.
           </p>
           <p class="text-xs text-amber mt-1">
             Hint: after generating the command, see if you can spot the password in it.
@@ -59,16 +57,14 @@ export function renderEncryption(container, state, actions) {
           <div class="panel-header">
             <div class="panel-title">
               <span class="panel-icon">📋</span>
-              <span>Step-by-step terminal instructions</span>
+              <span>What The Ransomware Is Running In The Background</span>
             </div>
           </div>
           <div class="panel-body">
             <ol class="guide-steps">
-              <li>Open Terminal on macOS/Linux, or use a shell with OpenSSL installed.</li>
-              <li>Run the check command first, then run the protection command.</li>
-              <li>Run each protection command in order. The original PDF remains available as a safety copy.</li>
+              In the real world, ransomware would run silently in the background to encrypt your files. In this training simulation, we will show you the commands that would be executed on your system. You can copy and paste these commands into a terminal to see how they work.
             </ol>
-            <div class="folder-field-label mt-2">1. Check that OpenSSL is installed</div>
+            <div class="folder-field-label mt-2">1. Check that OpenSSL is installed. If not, install it using your system's package manager.</div>
             <div class="code-copy-row">
               <textarea id="openssl-check-command" class="cyber-textarea font-mono" rows="2" readonly aria-label="OpenSSL check command">${escapeHtml(values.checkCommand)}</textarea>
               <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="openssl-check-command">Copy</button>
@@ -76,9 +72,9 @@ export function renderEncryption(container, state, actions) {
             ${values.protectCommands.map((command, index) => `
               <div class="folder-field-label mt-2">${index + 2}. ${[
                 'Encrypt to a temporary file',
-                'Verify the temporary file',
-                'Remove the original file',
-                'Download the simulated ransom note'
+                'Verify the temporary file. If it is empty, the encryption failed and the process will stop. (No point in continuing if the encryption failed because you have nothing to ransom.)',
+                'Remove the original file. Try opening the file left in the folder to confirm that it is no longer accessible.',
+                'Download the simulated ransom note. Open it to see the message that would be displayed to the victim.'
               ][index]}</div>
               <div class="code-copy-row">
                 <textarea id="protect-command-${index}" class="cyber-textarea font-mono" rows="${index === 1 || index === 3 ? 2 : 3}" readonly aria-label="Protection command ${index + 1}">${escapeHtml(command)}</textarea>

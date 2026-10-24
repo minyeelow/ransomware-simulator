@@ -45,19 +45,6 @@ export function renderEncryption(container) {
           <p class="text-xs text-muted mt-1">
             Save the file to your Downloads folder so the generated command can find it.
           </p>
-          <div class="folder-field-label mt-2">2. Password / decryption key</div>
-          <input
-            type="password"
-            id="encryption-password"
-            class="folder-path-input font-mono"
-            value="${escapeHtml(values.password || DEFAULT_PASSWORD)}"
-            placeholder="Enter a strong password or use the default"
-            aria-label="Encryption password"
-          />
-          <p class="text-xs text-muted mt-1">
-            This password is placed into the generated command. Do not share the
-            command or reuse this password for another account.
-          </p>
           <p class="text-xs text-amber mt-1">
             Hint: after generating the command, see if you can spot the password in it.
           </p>

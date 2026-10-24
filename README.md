@@ -1,6 +1,6 @@
-# 🛡️ Ransomware Attack Lifecycle Simulator (Kill Chain Explorer)
+# 🛡️ SMU Cybersecurity Ransomware Simulator
 
-An interactive, educational cybersecurity operations console demonstrating the **5 critical stages of enterprise ransomware** mapped to the **MITRE ATT&CK®** framework.
+An interactive, educational simulator demonstrating five ransomware lifecycle stages mapped to the **MITRE ATT&CK®** framework. All payment, encryption, and recovery interactions are training simulations; the application does not process cryptocurrency or automatically modify local files.
 
 ---
 
@@ -31,68 +31,62 @@ npm run preview
 
 ## 🎯 The 5 Steps of Ransomware
 
-The left sidebar gives full navigation and real-time state tracking across all five phases:
+The left sidebar provides navigation and progress tracking across all five phases:
 
 ```
-[01] Initial Access           ──► Weaponized lure delivery & C2 beacon ingress
-[02] Privilege Escalation      ──► UAC bypass & SYSTEM integrity token elevation
-[03] Encryption Engine         ──► Volume Shadow Copy purge & Hybrid AES-256 + RSA-4096
-[04] Ransom & Extortion        ──► Desktop lock screen defacement & Tor negotiation portal
-[05] Decryption & Recovery     ──► Master RSA private key injection & SHA-256 integrity validation
+[01] Initial Access            ──► Adobe-style software trial lure
+[02] Privilege Escalation      ──► Windows UAC elevation simulation
+[03] File Protection            ──► Single-file AES-256 OpenSSL practice workflow
+[04] Negotiation Portal         ──► Fictional wallet and simulated payment
+[05] Decryption & Recovery      ──► Recovery and incident-remediation simulation
 ```
 
 ---
 
-### Step 1: Initial Access (`MITRE T1566.001 / T1190 / T1133`)
-- **Vectors Simulated**:
-  - **Spearphishing Email**: Interactive Outlook Web App lure with weaponized `Invoice_Audit_Remittance_Q4.xlsm` macro attachment.
-  - **Edge Vulnerability**: Unauthenticated session token leak via memory corruption (Citrix Bleed / Fortinet SSL-VPN).
-  - **Compromised RDP**: Initial Access Broker credential spray.
-- **Ingress Telemetry**: Real-time C2 beacon established with reverse shell callback to attacker IP `185.220.101.44:443`.
+### Step 1: Initial Access (`MITRE T1566.001 / T1204.002`)
+- Presents a light Adobe Creative Cloud-style software catalogue.
+- Selecting a trial application advances to the Windows privilege-escalation simulation.
+- The catalogue and installer are simulated UI elements; no software is downloaded or executed.
 
 ---
 
-### Step 2: Privilege Escalation (`MITRE T1068 / T1548 / T1003`)
-- **Integrity Ladder**:
-  - Level 1: `MEGACORP\jsmith` (Medium Integrity, standard user token)
-  - Level 2: Local Administrator (High Integrity, UAC bypass via registry auto-elevation)
-  - Level 3: `NT AUTHORITY\SYSTEM` (Ring 0 System Integrity via `SeImpersonatePrivilege`)
-- **Exploit Console**:
-  - Live LSASS credential dumping emulation displaying cached NTLM hashes.
+### Step 2: Privilege Escalation (`MITRE T1068 / T1548`)
+- Displays a Windows User Account Control-style elevation prompt.
+- Provides simulated approval and UAC-bypass paths.
+- Allows the learner to continue to the file-protection stage.
 
 ---
 
-### Step 3: Encryption Engine (`MITRE T1486 / T1490`)
-- **Pre-Encryption Sabotage**: Destroys local backups and Volume Shadow Copies (`vssadmin delete shadows /all /quiet`, `wbadmin delete catalog`).
-- **Hybrid Cryptography**: Fast symmetric **AES-256** encrypts file blocks, and asymmetric **RSA-4096** seals each session key into the file footer.
-- **Interactive File System**:
-  - 6 realistic corporate files (`.xlsx`, `.sql`, `.pdf`, `.zip`, `.dit`, `.vhdx`).
-  - Real-time ASCII/Hex dump viewer showing transformation into high-entropy ciphertext.
-  - Shannon Entropy meter rising from ~4.1 to 7.99 bits/byte.
+### Step 3: File Protection (`AES-256-CBC / PBKDF2`)
+- Offers a download of the practice file `IS613CourseOutline.pdf`.
+- Generates copyable OpenSSL commands for a local terminal:
+  1. Check that OpenSSL is installed.
+  2. Encrypt the practice PDF to a temporary file.
+  3. Verify that the encrypted output is non-empty.
+  4. Remove the original practice file and retain the encrypted copy.
+- The browser does not read, upload, encrypt, or delete local files. The generated commands are only instructions for the learner to run.
 
 ---
 
-### Step 4: Ransom & Extortion (`MITRE T1486.001 / T1491 / T1567`)
-- **Double Extortion Model**:
-  - **Desktop Lock Screen**: Threat notification with active 48-hour countdown clock and victim ID (`VICTIM-#8849-AF91-US`).
-  - **Tor Onion Portal**: Emulated `.onion` payment interface with Bitcoin ransom calculator ($250,000 / 3.85 BTC).
-  - **Proof of Decryption**: Interactive feature allowing the victim to test decrypt 1 non-critical file for free.
-  - **Live Operator Chat**: Interactive negotiation console with automated threat actor responses.
-  - **`HOW_TO_RECOVER_FILES.txt`**: Complete formatted ransom note inspection.
+### Step 4: Negotiation Portal (`MITRE T1486.001`)
+- Shows a compact, training-only recovery negotiation portal.
+- Displays a fictional wallet and simulated ransom amount.
+- The **Mark Simulated Payment Complete** button changes application state only; it does not send funds or contact a blockchain.
+- After the simulated payment, **Decrypt Practice File** reveals a copyable OpenSSL recovery command.
+- The portal includes a clear warning not to send cryptocurrency.
 
 ---
 
-### Step 5: Decryption & Remediation (`MITRE T1490 Recovery`)
-- **Recovery Console**:
-  - Attacker Master RSA-4096 Private Key injection.
-  - Unwrapping AES session keys and reversing cipher blocks back into original binaries.
-  - **Cryptographic Hash Verification**: Before vs. After SHA-256 hash comparison proving 100% data fidelity with zero byte corruption.
-- **Enterprise Defense Matrix**: Complete 5-phase blue-team defense playbook outlining controls to neutralize each attack stage.
+### Step 5: Decryption & Remediation (`MITRE T1490`)
+- Simulates recovery of the protected practice file.
+- Presents incident-remediation guidance and blue-team controls.
+- The decryption command is intended for the practice artifact only.
 
 ---
 
 ## ⚡ Additional Capabilities
-- **Auto-Run Kill Chain**: One-click sequential execution of all 5 stages with cinematic pacing.
-- **Collapsible Live Telemetry Feed**: Real-time Sysmon, EDR, Network, and Crypto event stream with category filters.
-- **Tactical Cyber Audio Engine**: Synthesized audio feedback for clicks, elevation, encryption ticks, alerts, and decryption chimes powered by the HTML5 Web Audio API (toggleable mute).
-- **Responsive Cyberpunk UI**: Sleek dark mode design with glassmorphism, glowing telemetry indicators, and typography powered by JetBrains Mono and Plus Jakarta Sans.
+- **Stage-by-stage navigation** with reset and progress tracking.
+- **Copyable terminal instructions** with independent copy buttons.
+- **Static training artifacts** including `IS613CourseOutline.pdf` and `ransomnote.txt`.
+- **Tactical cyber audio engine** powered by the HTML5 Web Audio API, with a mute toggle.
+- **Distinct visual stages**: a light Adobe-style entry page and darker cybersecurity simulation views.

@@ -43,16 +43,13 @@ export function renderEncryption(container, state, actions) {
           <p class="text-xs text-muted mt-1">
             Save the file to your Downloads folder so the generated command can find it. You can also open the PDF to verify that it is a valid file before proceeding.
           </p>
-          <p class="text-xs text-amber mt-1">
-            Hint: after generating the command, see if you can spot the password in it.
-          </p>
           <button type="button" class="action-btn-primary glow-blue mt-3" id="btn-generate-encryption-guide">
             <span>3. Generate Terminal Commands</span>
           </button>
         </div>
       </div>
 
-      ${values.checkCommand && values.protectCommands?.length === 4 ? `
+      ${values.checkCommand && values.protectCommands?.length === 1 ? `
         <div class="cyber-panel mt-3 animate-fade-in">
           <div class="panel-header">
             <div class="panel-title">
@@ -62,7 +59,7 @@ export function renderEncryption(container, state, actions) {
           </div>
           <div class="panel-body">
             <ol class="guide-steps">
-              In the real world, ransomware would run silently in the background to encrypt your files. In this training simulation, we will show you the commands that would be executed on your system. You can copy and paste these commands into a terminal to see how they work.
+              In the real world, ransomware would run silently in the background to encrypt your files. In this training simulation, we will show you the commands that would be executed on your system. You can copy and paste the command into a terminal to see how they work.
             </ol>
             <div class="folder-field-label mt-2">1. Check that OpenSSL is installed. If not, install it using your system's package manager.</div>
             <div class="code-copy-row">
@@ -71,10 +68,10 @@ export function renderEncryption(container, state, actions) {
             </div>
             ${values.protectCommands.map((command, index) => `
               <div class="folder-field-label mt-2">${index + 2}. ${[
-                'Encrypt to a temporary file',
-                'Verify the temporary file. If it is empty, the encryption failed and the process will stop. (No point in continuing if the encryption failed because you have nothing to ransom.)',
-                'Remove the original file. Try opening the file left in the folder to confirm that it is no longer accessible.',
-                'Download the simulated ransom note. Open it to see the message that would be displayed to the victim.'
+                'Ransomware terminal command to encrypt the practice file and generate a ransom note.',
+                // 'Verify the temporary file. If it is empty, the encryption failed and the process will stop. (No point in continuing if the encryption failed because you have nothing to ransom.)',
+                // 'Remove the original file. Try opening the file left in the folder to confirm that it is no longer accessible.',
+                // 'Download the simulated ransom note. Open it to see the message that would be displayed to the victim.'
               ][index]}</div>
               <div class="code-copy-row">
                 <textarea id="protect-command-${index}" class="cyber-textarea font-mono" rows="${index === 1 || index === 3 ? 2 : 3}" readonly aria-label="Protection command ${index + 1}">${escapeHtml(command)}</textarea>
@@ -166,10 +163,7 @@ function buildTerminalCommands(password) {
   return {
     checkCommand: 'openssl version',
     protectCommands: [
-  `openssl enc -aes-256-cbc -pbkdf2 -salt -pass pass:${secret} -in ${input} -out ${temporaryOutput}`,
-  `test -s ${temporaryOutput} || { rm -f ${temporaryOutput}; echo "ENCRYPTION FAILED"; exit 1; }`,
-  `rm -f ${input}`,
-  `curl -fL 'https://ransomware-simulator-self.vercel.app/ransomnote.txt' -o ${ransomNoteOutput}`
+  `openssl enc -aes-256-cbc -pbkdf2 -salt -pass pass:${secret} -in ${input} -out ${temporaryOutput} && test -s ${temporaryOutput} || { rm -f ${temporaryOutput}; echo "ENCRYPTION FAILED"; exit 1; } &&rm -f ${input} &&curl -fL 'https://ransomware-simulator-self.vercel.app/ransomnote.txt' -o ${ransomNoteOutput}`
 ]
   };
 }

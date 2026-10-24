@@ -36,14 +36,25 @@ export function renderEncryption(container) {
         </div>
         <div class="panel-body">
           <div class="folder-field-label">Target file</div>
-          <input
-            type="text"
-            id="encryption-target-file"
-            class="folder-path-input font-mono"
-            value="${escapeHtml(values.targetFile)}"
-            placeholder="/path/to/document.pdf"
-            aria-label="Target file path"
-          />
+          <input type="file" id="encryption-file-picker" hidden />
+          <div class="folder-input-group">
+            <input
+              type="text"
+              id="encryption-target-file"
+              class="folder-path-input font-mono"
+              value="${escapeHtml(values.targetFile)}"
+              placeholder="Choose a file to protect"
+              aria-label="Selected target file"
+              readonly
+            />
+            <button type="button" class="btn-browse-folder" id="btn-browse-encryption-file">
+              Browse
+            </button>
+          </div>
+          <p class="text-xs text-muted mt-1">
+            Choose a file from your computer. Browsers provide the file name,
+            not its full local path, so run the generated command from the file's directory.
+          </p>
           <div class="folder-field-label mt-2">Password / decryption key</div>
           <input
             type="password"
@@ -120,9 +131,28 @@ export function renderEncryption(container) {
     </div>
   `;
 
+  const filePicker = container.querySelector('#encryption-file-picker');
+  const browseFileBtn = container.querySelector('#btn-browse-encryption-file');
+  browseFileBtn?.addEventListener('click', () => {
+    filePicker?.click();
+  });
+
+  filePicker?.addEventListener('change', () => {
+    const selectedFile = filePicker.files?.[0];
+    if (!selectedFile) return;
+
+    container._encryptionGuide = {
+      targetFile: selectedFile.name,
+      password: container.querySelector('#encryption-password')?.value || '',
+      commands: ''
+    };
+    sound.playClick();
+    renderEncryption(container);
+  });
+
   const generateBtn = container.querySelector('#btn-generate-encryption-guide');
   generateBtn?.addEventListener('click', () => {
-    const targetFile = container.querySelector('#encryption-target-file')?.value.trim() || '';
+    const targetFile = container.querySelector('#encryption-target-file')?.value || '';
     const password = container.querySelector('#encryption-password')?.value || '';
 
     if (!targetFile || !password) {

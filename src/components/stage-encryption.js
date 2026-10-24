@@ -10,7 +10,7 @@ export function renderEncryption(container) {
     targetFile: '',
     password: 'ProfPleaseGiveUsA+',
     checkCommand: '',
-    encryptionCommand: ''
+    protectCommand: ''
   };
 
   container.innerHTML = `
@@ -75,7 +75,7 @@ export function renderEncryption(container) {
         </div>
       </div>
 
-      ${values.checkCommand && values.encryptionCommand ? `
+      ${values.checkCommand && values.protectCommand ? `
         <div class="cyber-panel mt-3 animate-fade-in">
           <div class="panel-header">
             <div class="panel-title">
@@ -86,18 +86,18 @@ export function renderEncryption(container) {
           <div class="panel-body">
             <ol class="guide-steps">
               <li>Open Terminal on macOS/Linux, or use a shell with OpenSSL installed.</li>
-              <li>Run the check command first, then run the encryption command.</li>
-              <li>The encryption command creates a new <code>.aes256</code> file and preserves the original.</li>
+              <li>Run the check command first, then run the protection command.</li>
+              <li>The protection command locates the selected file and creates a new <code>.aes256</code> file without changing the original.</li>
             </ol>
             <div class="folder-field-label mt-2">1. Check that OpenSSL is installed</div>
             <div class="code-copy-row">
               <textarea id="openssl-check-command" class="cyber-textarea font-mono" rows="2" readonly aria-label="OpenSSL check command">${escapeHtml(values.checkCommand)}</textarea>
               <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="openssl-check-command">Copy</button>
             </div>
-            <div class="folder-field-label mt-2">2. Encrypt the selected file</div>
+            <div class="folder-field-label mt-2">2. Locate and encrypt the selected file</div>
             <div class="code-copy-row">
-              <textarea id="encryption-command" class="cyber-textarea font-mono" rows="3" readonly aria-label="File encryption command">${escapeHtml(values.encryptionCommand)}</textarea>
-              <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="encryption-command">Copy</button>
+              <textarea id="protect-file-command" class="cyber-textarea font-mono" rows="6" readonly aria-label="File location and encryption command">${escapeHtml(values.protectCommand)}</textarea>
+              <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="protect-file-command">Copy</button>
             </div>
           </div>
         </div>
@@ -119,7 +119,7 @@ export function renderEncryption(container) {
       targetFile: selectedFile.name,
       password: container.querySelector('#encryption-password')?.value || '',
       checkCommand: '',
-      encryptionCommand: ''
+      protectCommand: ''
     };
     sound.playClick();
     renderEncryption(container);
@@ -163,13 +163,16 @@ export function renderEncryption(container) {
 }
 
 function buildTerminalCommands(targetFile, password) {
-  const input = shellQuote(targetFile);
-  const output = shellQuote(`${targetFile}.aes256`);
   const secret = shellQuote(password);
 
   return {
     checkCommand: 'openssl version',
-    encryptionCommand: `openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in ${input} -out ${output} -pass pass:${secret}`
+    protectCommand: `FILE=$(find ~ -type f -name ${shellQuote(targetFile)} -print -quit 2>/dev/null)
+if [ -z "$FILE" ]; then
+  echo "File not found: ${shellQuote(targetFile)}"
+  exit 1
+fi
+openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in "$FILE" -out "$FILE.aes256" -pass pass:${secret}`
   };
 }
 

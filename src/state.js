@@ -155,7 +155,7 @@ class StateStore {
 
   reset() {
     this.state = {
-      currentStageId: 'initial-access',
+      currentStageId: 'pre-setup',
       isAutoPlaying: false,
       autoPlaySpeed: 1, // 1x, 2x
       targetHost: {
@@ -168,11 +168,9 @@ class StateStore {
         integrityLevel: 'Medium'
       },
       targetFolder: {
-        path: 'C:\\Users\\Victim\\Documents\\ConfidentialData',
-        name: 'ConfidentialData',
-        filesCount: 6,
-        isCustom: false,
-        files: []
+        path: '',
+        name: 'Not Linked',
+        isLinked: false
       },
       stagesCompleted: {
         'initial-access': false,
@@ -261,61 +259,43 @@ class StateStore {
     this.notify();
   }
 
-  setTargetFolder(folderData) {
+  linkTargetFolder(rawPath) {
+    const cleaned = (rawPath || '').trim();
+    if (!cleaned) return false;
+
+    // Normalize slashes and extract folder name
+    const normalized = cleaned.replace(/\\/g, '/');
+    const segments = normalized.split('/').filter(Boolean);
+    const folderName = segments.length > 0 ? segments[segments.length - 1] : 'TargetFolder';
+
     this.state.targetFolder = {
-      ...this.state.targetFolder,
-      ...folderData
+      path: cleaned,
+      name: folderName,
+      isLinked: true
     };
-    this.addTelemetry('FileSystem', 'INFO', `Target folder pointer set to: ${this.state.targetFolder.path}`);
+
+    // Update target paths of simulated files to reside inside the pointed folder
+    const sep = cleaned.includes('/') ? '/' : '\\';
+    this.state.encryption.files.forEach(f => {
+      f.path = `${cleaned}${sep}${f.name}`;
+    });
+
+    this.addTelemetry('FileSystem', 'SUCCESS', `Target directory pointer linked: ${cleaned}`);
+    
+    // Automatically transition to Step 1: Initial Access once local linked!
+    this.state.currentStageId = 'initial-access';
     this.notify();
+    return true;
   }
 
-  setFolderFromLocalFiles(fileList) {
-    if (!fileList || fileList.length === 0) return;
-    const firstFile = fileList[0];
-    let folderName = 'Selected Folder';
-    let path = 'Local System Folder';
-
-    if (firstFile.webkitRelativePath) {
-      const parts = firstFile.webkitRelativePath.split('/');
-      if (parts.length > 1) {
-        folderName = parts[0];
-        path = `[Local] /${folderName}`;
-      }
-    }
-
-    const files = Array.from(fileList).slice(0, 20).map((f) => ({
-      name: f.name,
-      size: (f.size / (1024 * 1024)).toFixed(2) + ' MB',
-      type: f.type || 'Data File'
-    }));
-
+  unlinkTargetFolder() {
     this.state.targetFolder = {
-      path: path,
-      name: folderName,
-      filesCount: fileList.length,
-      isCustom: true,
-      files: files
+      path: '',
+      name: 'Not Linked',
+      isLinked: false
     };
-
-    if (files.length > 0) {
-      this.state.encryption.files = files.slice(0, 6).map((f, idx) => ({
-        id: `f_custom_${idx}`,
-        name: f.name,
-        path: `${path}/${f.name}`,
-        size: f.size,
-        type: f.type,
-        status: 'clean',
-        progress: 0,
-        entropy: (3.2 + Math.random() * 1.5).toFixed(2),
-        originalHash: `SHA256: ${Math.random().toString(16).substring(2, 8)}...${Math.random().toString(16).substring(2, 6)}`,
-        currentHash: `SHA256: ${Math.random().toString(16).substring(2, 8)}...${Math.random().toString(16).substring(2, 6)}`,
-        plainPreview: '4C 6F 63 61 6C 20 44 61 | Local file data',
-        cipherPreview: 'A4 F9 21 D8 03 E7 BC 44 | AES-256 High Entropy'
-      }));
-    }
-
-    this.addTelemetry('FileSystem', 'SUCCESS', `Linked local directory: ${folderName} (${fileList.length} files detected)`);
+    this.state.currentStageId = 'pre-setup';
+    this.addTelemetry('FileSystem', 'WARN', 'Target directory pointer cleared.');
     this.notify();
   }
 

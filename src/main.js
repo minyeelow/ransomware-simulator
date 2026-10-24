@@ -5,6 +5,7 @@
 import { store, STAGES } from './state.js';
 import { sound } from './sound.js';
 import { renderSidebar } from './components/sidebar.js';
+import { renderPreSetup } from './components/stage-pre-setup.js';
 import { renderInitialAccess } from './components/stage-initial-access.js';
 import { renderPrivEsc } from './components/stage-priv-esc.js';
 import { renderEncryption } from './components/stage-encryption.js';
@@ -19,6 +20,7 @@ const terminalEl = document.getElementById('terminal-container');
 
 // Stage render map
 const STAGE_RENDERERS = {
+  'pre-setup': renderPreSetup,
   'initial-access': renderInitialAccess,
   'privilege-escalation': renderPrivEsc,
   'encryption': renderEncryption,
@@ -32,18 +34,12 @@ const actions = {
     store.setCurrentStage(stageId);
   },
 
-  onFolderSelected: (fileList) => {
-    store.setFolderFromLocalFiles(fileList);
+  onLinkFolder: (path) => {
+    store.linkTargetFolder(path);
   },
 
-  onSetFolderPath: (rawPath) => {
-    const segments = rawPath.replace(/\\/g, '/').split('/').filter(Boolean);
-    const folderName = segments.length > 0 ? segments[segments.length - 1] : 'TargetFolder';
-    store.setTargetFolder({
-      path: rawPath,
-      name: folderName,
-      isCustom: true
-    });
+  onUnlinkFolder: () => {
+    store.unlinkTargetFolder();
   },
 
   onSelectVector: (vector) => {
@@ -149,8 +145,12 @@ function delay(ms) {
 // Master Render Function
 function renderApp(state) {
   const topScopeEl = document.getElementById('top-nav-scope');
-  if (topScopeEl && state.targetFolder) {
-    topScopeEl.textContent = `TARGET DIR: ${state.targetFolder.path}`;
+  if (topScopeEl) {
+    if (state.targetFolder?.isLinked) {
+      topScopeEl.textContent = `TARGET DIR: ${state.targetFolder.path}`;
+    } else {
+      topScopeEl.textContent = `TARGET DIR: [AWAITING LOCAL LINK]`;
+    }
   }
 
   if (sidebarEl) {
@@ -158,7 +158,7 @@ function renderApp(state) {
   }
 
   if (stageViewportEl) {
-    const renderer = STAGE_RENDERERS[state.currentStageId] || renderInitialAccess;
+    const renderer = STAGE_RENDERERS[state.currentStageId] || renderPreSetup;
     renderer(stageViewportEl, state, actions);
   }
 

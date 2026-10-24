@@ -1,7 +1,7 @@
 /**
  * Sidebar Component
  * Features:
- * 1. Target Folder Pointer (top left): allows users to indicate a local folder on their computer via directory picker or path input.
+ * 1. Target Folder Pointer (top left): allows users to indicate a local folder on their computer via text path pointer (no upload).
  * 2. Ransomware Steps Progress Indicator (non-clickable progress bar showing which step the user is seeing right now).
  * 3. Kill chain controls (Auto-Run, Reset, Sound toggle).
  */
@@ -9,16 +9,23 @@ import { STAGES } from '../state.js';
 import { sound } from '../sound.js';
 
 export function renderSidebar(container, state, actions) {
-  const currentStage = STAGES.find(s => s.id === state.currentStageId) || STAGES[0];
+  const isLinked = state.targetFolder?.isLinked || false;
   const currentStageIndex = STAGES.findIndex(s => s.id === state.currentStageId);
   const completedCount = Object.values(state.stagesCompleted).filter(Boolean).length;
-  const progressPct = Math.round(((currentStageIndex + 1) / STAGES.length) * 100);
+  
+  // Progress calculation
+  let progressPct = 0;
+  let progressLabel = 'AWAITING LOCAL POINTER';
+  if (isLinked) {
+    const activeStepNum = currentStageIndex >= 0 ? currentStageIndex + 1 : 1;
+    progressPct = Math.round((activeStepNum / STAGES.length) * 100);
+    progressLabel = `STEP ${activeStepNum} OF 5`;
+  }
 
   const folder = state.targetFolder || {
-    path: 'C:\\Users\\Victim\\Documents\\ConfidentialData',
-    name: 'ConfidentialData',
-    filesCount: 6,
-    isCustom: false
+    path: '',
+    name: 'Not Linked',
+    isLinked: false
   };
 
   container.innerHTML = `
@@ -39,63 +46,55 @@ export function renderSidebar(container, state, actions) {
       </div>
 
       <!-- Target Folder Pointer (Replaces Target Node Status) -->
-      <div class="folder-pointer-card" id="folder-pointer-card">
+      <div class="folder-pointer-card ${isLinked ? 'folder-linked' : 'folder-unlinked'}" id="folder-pointer-card">
         <div class="folder-card-header">
           <div class="folder-header-title-group">
             <span class="folder-icon">📁</span>
             <span class="folder-card-title font-mono">TARGET FOLDER POINTER</span>
           </div>
-          <span class="folder-status-badge ${folder.isCustom ? 'badge-custom' : 'badge-default'} font-mono">
-            ${folder.isCustom ? 'LOCAL LINKED' : 'READY'}
+          <span class="folder-status-badge ${isLinked ? 'badge-custom' : 'badge-unlinked'} font-mono" id="folder-status-pill">
+            ${isLinked ? '✓ LOCAL LINKED' : '⚠️ AWAITING PATH'}
           </span>
         </div>
 
         <div class="folder-pointer-body">
-          <label class="folder-field-label font-mono text-xs text-muted" for="folder-path-input">
-            Indicate Local Directory:
+          <label class="folder-field-label font-mono text-xs text-muted" for="sidebar-folder-path-input">
+            ${isLinked ? 'Linked Directory Pointer:' : 'Indicate Local Directory Path:'}
           </label>
 
-          <!-- Path Input & Browse Button -->
+          <!-- Path Input & Link Button -->
           <div class="folder-input-group">
             <input 
               type="text" 
-              class="folder-path-input font-mono" 
-              id="folder-path-input" 
-              value="${folder.path}" 
-              placeholder="/path/to/local/folder" 
-              title="Type or edit local directory path"
+              class="folder-path-input font-mono ${isLinked ? 'input-linked' : ''}" 
+              id="sidebar-folder-path-input" 
+              value="${escapeHtml(folder.path)}" 
+              placeholder="e.g. C:\\Users\\Name\\Documents" 
+              title="Enter or edit your local directory path"
             />
             <button 
               type="button" 
-              class="btn-browse-folder" 
-              id="btn-trigger-folder-picker" 
-              title="Browse and select a folder from your local computer"
+              class="btn-link-folder ${isLinked ? 'btn-linked' : ''}" 
+              id="btn-sidebar-link-folder" 
+              title="${isLinked ? 'Change or update directory path' : 'Link this local folder pointer'}"
             >
-              <svg class="folder-browse-icon" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
-              </svg>
-              <span>Browse</span>
+              <span>${isLinked ? 'Update' : 'Link'}</span>
             </button>
-            <!-- Hidden Native Folder Picker -->
-            <input 
-              type="file" 
-              id="native-folder-input" 
-              webkitdirectory 
-              directory 
-              multiple 
-              style="display: none;" 
-            />
           </div>
 
           <!-- Folder Meta & Target Summary -->
           <div class="folder-meta-grid font-mono text-xs">
             <div class="folder-meta-row">
               <span class="folder-meta-label">Folder Name:</span>
-              <span class="folder-meta-val text-highlight" id="folder-display-name">${folder.name}</span>
+              <span class="folder-meta-val ${isLinked ? 'text-highlight' : 'text-muted'}" id="sidebar-folder-name">
+                ${isLinked ? folder.name : 'None specified'}
+              </span>
             </div>
             <div class="folder-meta-row">
-              <span class="folder-meta-label">Files Targeted:</span>
-              <span class="folder-meta-val text-cyan" id="folder-display-count">${folder.filesCount} files</span>
+              <span class="folder-meta-label">Status:</span>
+              <span class="folder-meta-val ${isLinked ? 'text-emerald' : 'text-amber'}">
+                ${isLinked ? 'Pointed (Ready for Step 1)' : 'Required before Step 1'}
+              </span>
             </div>
           </div>
         </div>
@@ -105,24 +104,27 @@ export function renderSidebar(container, state, actions) {
       <div class="stepper-section">
         <div class="stepper-header">
           <span class="stepper-heading">RANSOMWARE PROGRESS</span>
-          <span class="stepper-progress-text font-mono">STEP ${currentStageIndex + 1} OF 5</span>
+          <span class="stepper-progress-text font-mono">${progressLabel}</span>
         </div>
 
         <!-- Progress Track Bar -->
-        <div class="killchain-progress-track" title="Kill chain execution stage: Step ${currentStageIndex + 1} of 5">
+        <div class="killchain-progress-track" title="Kill chain execution progress: ${progressPct}%">
           <div class="killchain-progress-fill" style="width: ${progressPct}%;"></div>
         </div>
 
         <!-- The 5 Steps Progress List (Display only - not clickable tabs) -->
         <div class="steps-progress-list" id="steps-progress-list" aria-label="Ransomware lifecycle progress steps">
-          ${STAGES.map((stage, idx) => {
-            const isActive = stage.id === state.currentStageId;
+          ${STAGES.map((stage) => {
+            const isActive = isLinked && stage.id === state.currentStageId;
             const isCompleted = state.stagesCompleted[stage.id];
             
             // Badge states
-            let badgeText = 'UPCOMING';
+            let badgeText = 'LOCKED';
             let badgeClass = 'badge-upcoming';
-            if (isActive) {
+            if (!isLinked) {
+              badgeText = 'AWAITING SETUP';
+              badgeClass = 'badge-upcoming';
+            } else if (isActive) {
               badgeText = 'NOW SHOWING';
               badgeClass = 'badge-active';
             } else if (isCompleted) {
@@ -132,11 +134,11 @@ export function renderSidebar(container, state, actions) {
 
             return `
               <div 
-                class="step-progress-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" 
+                class="step-progress-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${!isLinked ? 'item-locked' : ''}" 
                 id="step-indicator-${stage.id}"
                 data-stage-id="${stage.id}"
               >
-                <!-- Number / Checkmark Badge -->
+                <!-- Number / Checkmark Bubble -->
                 <div class="step-num-bubble">
                   ${isCompleted ? `
                     <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor">
@@ -191,38 +193,35 @@ export function renderSidebar(container, state, actions) {
     </aside>
   `;
 
+  function escapeHtml(str) {
+    return (str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
   // Folder pointer interaction handlers
-  const folderInput = container.querySelector('#native-folder-input');
-  const browseBtn = container.querySelector('#btn-trigger-folder-picker');
-  const pathInput = container.querySelector('#folder-path-input');
+  const linkBtn = container.querySelector('#btn-sidebar-link-folder');
+  const pathInput = container.querySelector('#sidebar-folder-path-input');
 
-  if (browseBtn && folderInput) {
-    browseBtn.addEventListener('click', () => {
+  const executeLink = () => {
+    const rawPath = pathInput ? pathInput.value.trim() : '';
+    if (rawPath) {
       sound.playClick();
-      folderInput.click();
-    });
+      actions.onLinkFolder(rawPath);
+    } else if (pathInput) {
+      pathInput.focus();
+    }
+  };
 
-    folderInput.addEventListener('change', (e) => {
-      if (e.target.files && e.target.files.length > 0) {
-        sound.playClick();
-        if (actions.onFolderSelected) {
-          actions.onFolderSelected(e.target.files);
-        }
-      }
-    });
+  if (linkBtn) {
+    linkBtn.addEventListener('click', executeLink);
   }
 
   if (pathInput) {
-    pathInput.addEventListener('change', (e) => {
-      const rawPath = e.target.value.trim();
-      if (rawPath && actions.onSetFolderPath) {
-        actions.onSetFolderPath(rawPath);
-      }
-    });
-
     pathInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        pathInput.blur();
+        executeLink();
       }
     });
   }

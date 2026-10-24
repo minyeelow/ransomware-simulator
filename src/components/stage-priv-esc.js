@@ -269,7 +269,10 @@ export function renderPrivEsc(container, state, actions) {
       sound.playClick();
       const result = await openLocalDirectoryPicker(folderPickerInput);
       if (result?.path) {
-        linkEncryptionTarget(result.path);
+        actions.onLinkFolder(result.path, {
+          transitionToInitialAccess: false,
+          handle: result.handle
+        });
       }
     });
   }

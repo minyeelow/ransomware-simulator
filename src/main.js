@@ -5,7 +5,6 @@
 import { store, STAGES } from './state.js';
 import { sound } from './sound.js';
 import { renderSidebar } from './components/sidebar.js';
-import { renderPreSetup } from './components/stage-pre-setup.js';
 import { renderInitialAccess } from './components/stage-initial-access.js';
 import { renderPrivEsc } from './components/stage-priv-esc.js';
 import { renderEncryption } from './components/stage-encryption.js';
@@ -20,7 +19,6 @@ const terminalEl = document.getElementById('terminal-container');
 
 // Stage render map
 const STAGE_RENDERERS = {
-  'pre-setup': renderPreSetup,
   'initial-access': renderInitialAccess,
   'privilege-escalation': renderPrivEsc,
   'encryption': renderEncryption,
@@ -36,10 +34,6 @@ const actions = {
 
   onLinkFolder: (path, options) => {
     store.linkTargetFolder(path, options);
-  },
-
-  onUnlinkFolder: () => {
-    store.unlinkTargetFolder();
   },
 
   onSelectVector: (vector) => {
@@ -158,7 +152,7 @@ function renderApp(state) {
   }
 
   if (stageViewportEl) {
-    const renderer = STAGE_RENDERERS[state.currentStageId] || renderPreSetup;
+    const renderer = STAGE_RENDERERS[state.currentStageId] || renderInitialAccess;
     renderer(stageViewportEl, state, actions);
   }
 

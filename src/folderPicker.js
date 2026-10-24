@@ -9,7 +9,7 @@ export async function openLocalDirectoryPicker(fallbackInputEl) {
   if (typeof window.showDirectoryPicker === 'function') {
     try {
       const dirHandle = await window.showDirectoryPicker({
-        mode: 'read'
+        mode: 'readwrite'
       });
       if (dirHandle && dirHandle.name) {
         // Construct clean path pointer (browser privacy shields full absolute path)
@@ -17,7 +17,8 @@ export async function openLocalDirectoryPicker(fallbackInputEl) {
         return {
           name: dirHandle.name,
           path: pathPointer,
-          isLinked: true
+          isLinked: true,
+          handle: dirHandle
         };
       }
     } catch (err) {

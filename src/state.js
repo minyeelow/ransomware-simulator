@@ -1,6 +1,7 @@
 /**
  * Central State Machine for Ransomware Lifecycle Simulator
  */
+import { encryptFolderCopies } from './safeEncryption.js';
 
 export const STAGES = [
   {
@@ -155,7 +156,7 @@ class StateStore {
 
   reset() {
     this.state = {
-      currentStageId: 'pre-setup',
+      currentStageId: 'initial-access',
       isAutoPlaying: false,
       autoPlaySpeed: 1, // 1x, 2x
       targetHost: {
@@ -170,7 +171,8 @@ class StateStore {
       targetFolder: {
         path: '',
         name: 'Not Linked',
-        isLinked: false
+        isLinked: false,
+        handle: null
       },
       stagesCompleted: {
         'initial-access': false,
@@ -259,7 +261,7 @@ class StateStore {
     this.notify();
   }
 
-  linkTargetFolder(rawPath, { transitionToInitialAccess = true } = {}) {
+  linkTargetFolder(rawPath, { transitionToInitialAccess = true, handle = null } = {}) {
     const cleaned = (rawPath || '').trim();
     if (!cleaned) return false;
 
@@ -271,7 +273,8 @@ class StateStore {
     this.state.targetFolder = {
       path: cleaned,
       name: folderName,
-      isLinked: true
+      isLinked: true,
+      handle
     };
 
     // Update target paths of simulated files to reside inside the pointed folder
@@ -294,9 +297,10 @@ class StateStore {
     this.state.targetFolder = {
       path: '',
       name: 'Not Linked',
-      isLinked: false
+      isLinked: false,
+      handle: null
     };
-    this.state.currentStageId = 'pre-setup';
+    this.state.currentStageId = 'initial-access';
     this.addTelemetry('FileSystem', 'WARN', 'Target directory pointer cleared.');
     this.notify();
   }
@@ -359,6 +363,23 @@ class StateStore {
     this.state.targetHost.health = 'ENCRYPTING';
     this.deleteShadowCopies();
     this.notify();
+
+    if (this.state.targetFolder.handle) {
+      try {
+        const result = await encryptFolderCopies(this.state.targetFolder.handle);
+        this.state.encryption.totalEncryptedBytes = result.totalBytes;
+        this.addTelemetry(
+          'FileSystem',
+          'SUCCESS',
+          `Safe encrypted copies written to ${this.state.targetFolder.name}/encrypted-output (${result.fileCount} files). Originals preserved.`
+        );
+      } catch (error) {
+        this.state.encryption.status = 'idle';
+        this.state.targetHost.health = 'PRIV_ELEVATED';
+        this.addTelemetry('FileSystem', 'ERROR', `Safe copy encryption failed: ${error.message}`);
+        throw error;
+      }
+    }
 
     const files = this.state.encryption.files;
     for (let i = 0; i < files.length; i++) {

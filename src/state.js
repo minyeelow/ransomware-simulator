@@ -215,6 +215,7 @@ class StateStore {
         onionUrl: 'http://lockbit37x...ransomportal.onion/victim/8849',
         ransomAmountUsd: '$250,000 USD',
         ransomBtc: '3.85 BTC',
+        paymentConfirmed: false,
         countdownSeconds: 172800, // 48:00:00
         freeDecryptUsed: false,
         freeDecryptedFileId: null,
@@ -412,6 +413,12 @@ class StateStore {
     this.state.stagesCompleted['ransom'] = true;
     this.addTelemetry('Desktop', 'CRITICAL', 'Registry user wallpaper replaced: C:\\ProgramData\\lockscreen_threat.bmp');
     this.addTelemetry('FileSystem', 'ALERT', 'Ransom note written to 6 directories: HOW_TO_RECOVER_FILES.txt');
+    this.notify();
+  }
+
+  confirmSimulatedPayment() {
+    this.state.ransom.paymentConfirmed = true;
+    this.addTelemetry('Simulation', 'INFO', 'Simulated ransom payment marked complete; recovery instructions revealed.');
     this.notify();
   }
 

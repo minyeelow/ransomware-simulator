@@ -167,6 +167,14 @@ export function renderRansom(container, state, actions) {
 
             <!-- Tor Split: Payment & Free Decrypt vs Live Operator Chat -->
             <div class="tor-grid-split">
+              <div class="cyber-panel mt-3 simulation-warning-panel">
+                <div class="panel-body text-sm">
+                  <strong class="text-amber">Training simulation:</strong>
+                  This portal and wallet are fictional. Do not send cryptocurrency
+                  or interact with a real ransom demand.
+                </div>
+              </div>
+
               <!-- Left: Proof of Decryption & Double Extortion Threat -->
               <div class="tor-card">
                 <h4 class="tor-card-title">1. Proof of Decryption (Test 1 File Free)</h4>
@@ -194,6 +202,30 @@ export function renderRansom(container, state, actions) {
                     We downloaded <strong>42.8 GB</strong> of your internal files (Executive emails, payroll, and unreleased source code). 
                     If payment is not received before timer expires, files will be published to the Dark Web DLS blog.
                   </div>
+
+                  <div class="payment-card mt-3">
+                    <div class="payment-label font-mono">SIMULATED PAYMENT DESTINATION</div>
+                    <code class="payment-wallet">bc1q-training-only-wallet-never-pay</code>
+                    <div class="text-xs text-muted mt-1">Example wallet for classroom use only.</div>
+                    <button type="button" class="btn-primary-small mt-2" id="btn-simulated-payment" ${ransomState.paymentConfirmed ? 'disabled' : ''}>
+                      ${ransomState.paymentConfirmed ? '✓ Simulated Payment Marked Complete' : 'Mark Simulated Payment Complete'}
+                    </button>
+                  </div>
+
+                  ${ransomState.paymentConfirmed ? `
+                    <div class="cyber-panel mt-3 animate-fade-in">
+                      <div class="panel-body">
+                        <div class="folder-field-label">Recovery command revealed after simulated payment</div>
+                        <div class="code-copy-row mt-1">
+                          <textarea id="ransom-decryption-command" class="cyber-textarea font-mono" rows="4" readonly aria-label="Decryption command">openssl enc -d -aes-256-cbc -pbkdf2 \
+  -pass pass:'ProfPleaseGiveUsA+' \
+  -in "$HOME/Downloads/IS613CourseOutline.pdf.enc" \
+  -out "$HOME/Downloads/IS613CourseOutline_decrypted.pdf"</textarea>
+                          <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="ransom-decryption-command">Copy</button>
+                        </div>
+                      </div>
+                    </div>
+                  ` : ''}
                 </div>
               </div>
 
@@ -287,6 +319,30 @@ PAYMENT DEADLINE: 48 HOURS FROM INCIDENT TRIGGER
       if (select) {
         actions.onTestFreeDecrypt(select.value);
       }
+
+      const simulatedPaymentBtn = container.querySelector('#btn-simulated-payment');
+      if (simulatedPaymentBtn) {
+        simulatedPaymentBtn.addEventListener('click', () => {
+          sound.playSuccess();
+          actions.onConfirmSimulatedPayment();
+        });
+      }
+
+      container.querySelectorAll('.copy-command-btn').forEach((copyBtn) => {
+        copyBtn.addEventListener('click', async () => {
+          const output = container.querySelector(`#${copyBtn.dataset.copyTarget}`);
+          if (!output) return;
+
+          try {
+            await navigator.clipboard.writeText(output.value);
+            copyBtn.textContent = 'Copied';
+          } catch (error) {
+            output.select();
+            copyBtn.textContent = 'Select and copy';
+            console.warn('Clipboard access was unavailable:', error);
+          }
+        });
+      });
     });
   }
 

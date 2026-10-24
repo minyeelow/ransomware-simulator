@@ -57,6 +57,10 @@ const actions = {
     store.deployRansom();
   },
 
+  onConfirmSimulatedPayment: () => {
+    store.confirmSimulatedPayment();
+  },
+
   onSelectRansomTab: (tab) => {
     store.state.ransom.activeTab = tab;
     store.notify();

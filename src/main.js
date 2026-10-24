@@ -1,6 +1,6 @@
 /**
  * Application Entry Point
- * Orchestrates sidebar, stages, telemetry terminal, and simulation sequencer.
+ * Orchestrates the simulator stages and navigation.
  */
 import { store, STAGES } from './state.js';
 import { sound } from './sound.js';
@@ -10,12 +10,10 @@ import { renderPrivEsc } from './components/stage-priv-esc.js';
 import { renderEncryption } from './components/stage-encryption.js';
 import { renderRansom } from './components/stage-ransom.js';
 import { renderDecryption } from './components/stage-decryption.js';
-import { renderTerminal } from './components/terminal.js';
 
 // DOM container elements
 const sidebarEl = document.getElementById('sidebar-container');
 const stageViewportEl = document.getElementById('stage-viewport');
-const terminalEl = document.getElementById('terminal-container');
 
 // Stage render map
 const STAGE_RENDERERS = {
@@ -82,62 +80,12 @@ const actions = {
     store.resetAll();
   },
 
-  onRunFullChain: async () => {
-    // Sequentially execute all 5 phases with cinematic timing
-    store.resetAll();
-    await delay(500);
-
-    // Step 1: Initial Access
-    store.setCurrentStage('initial-access');
-    sound.playStageChange();
-    await delay(1200);
-    sound.playAlert();
-    store.triggerInitialAccess('phishing');
-    await delay(2000);
-
-    // Step 2: Privilege Escalation
-    store.setCurrentStage('privilege-escalation');
-    sound.playStageChange();
-    await delay(1200);
-    sound.playElevation();
-    store.triggerPrivEsc();
-    await delay(2000);
-
-    // Step 3: Encryption
-    store.setCurrentStage('encryption');
-    sound.playStageChange();
-    await delay(1200);
-    sound.playAlert();
-    await store.startFileEncryption(() => {
-      sound.playEncryptTick();
-    });
-    await delay(2000);
-
-    // Step 4: Ransom & Extortion
-    store.setCurrentStage('ransom');
-    sound.playStageChange();
-    await delay(1000);
-    sound.playAlert();
-    store.deployRansom();
-    await delay(2500);
-
-    // Step 5: Decryption & Recovery
-    store.setCurrentStage('decryption');
-    sound.playStageChange();
-    await delay(1200);
-    sound.playSuccess();
-    await store.startDecryption(() => {
-      sound.playClick();
-    });
-  }
 };
-
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 // Master Render Function
 function renderApp(state) {
+  document.body.classList.toggle('adobe-landing-active', state.currentStageId === 'initial-access');
+
   const topScopeEl = document.getElementById('top-nav-scope');
   if (topScopeEl) {
     if (state.targetFolder?.isLinked) {
@@ -156,9 +104,6 @@ function renderApp(state) {
     renderer(stageViewportEl, state, actions);
   }
 
-  if (terminalEl) {
-    renderTerminal(terminalEl, state);
-  }
 }
 
 // Initialize sound on first user gesture anywhere

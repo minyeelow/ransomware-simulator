@@ -5,10 +5,12 @@
  */
 import { sound } from '../sound.js';
 
+const COURSE_OUTLINE_FILE = 'IS613CourseOutline.pdf';
+const DEFAULT_PASSWORD = 'ProfPleaseGiveUsA+';
+
 export function renderEncryption(container) {
   const values = container._encryptionGuide || {
-    targetFile: '',
-    password: 'ProfPleaseGiveUsA+',
+    password: DEFAULT_PASSWORD,
     checkCommand: '',
     protectCommand: ''
   };
@@ -36,32 +38,19 @@ export function renderEncryption(container) {
           <span class="panel-tag font-mono">LOCAL TERMINAL GUIDE</span>
         </div>
         <div class="panel-body">
-          <div class="folder-field-label">Target file</div>
-          <input type="file" id="encryption-file-picker" hidden />
-          <div class="folder-input-group">
-            <input
-              type="text"
-              id="encryption-target-file"
-              class="folder-path-input font-mono"
-              value="${escapeHtml(values.targetFile)}"
-              placeholder="Choose a file to protect"
-              aria-label="Selected target file"
-              readonly
-            />
-            <button type="button" class="btn-browse-folder" id="btn-browse-encryption-file">
-              Browse
-            </button>
-          </div>
+          <div class="folder-field-label">1. Download the practice file</div>
+          <a class="btn-primary-confirm" href="./${COURSE_OUTLINE_FILE}" download>
+            Download ${COURSE_OUTLINE_FILE}
+          </a>
           <p class="text-xs text-muted mt-1">
-            Choose a file from your computer. Browsers provide the file name,
-            not its full local path, so run the generated command from the file's directory.
+            Save the file to your Downloads folder so the generated command can find it.
           </p>
-          <div class="folder-field-label mt-2">Password / decryption key</div>
+          <div class="folder-field-label mt-2">2. Password / decryption key</div>
           <input
             type="password"
             id="encryption-password"
             class="folder-path-input font-mono"
-            value="${escapeHtml(values.password || 'ProfPleaseGiveUsA+')}"
+            value="${escapeHtml(values.password || DEFAULT_PASSWORD)}"
             placeholder="Enter a strong password or use the default"
             aria-label="Encryption password"
           />
@@ -69,8 +58,11 @@ export function renderEncryption(container) {
             This password is placed into the generated command. Do not share the
             command or reuse this password for another account.
           </p>
+          <p class="text-xs text-amber mt-1">
+            Hint: after generating the command, see if you can spot the password in it.
+          </p>
           <button type="button" class="action-btn-primary glow-blue mt-3" id="btn-generate-encryption-guide">
-            <span>Generate Terminal Commands</span>
+            <span>3. Generate Terminal Commands</span>
           </button>
         </div>
       </div>
@@ -87,7 +79,7 @@ export function renderEncryption(container) {
             <ol class="guide-steps">
               <li>Open Terminal on macOS/Linux, or use a shell with OpenSSL installed.</li>
               <li>Run the check command first, then run the protection command.</li>
-              <li>The protection command locates the selected file and creates a new <code>.aes256</code> file without changing the original.</li>
+              <li>The protection command reads the downloaded file from <code>~/Downloads</code> and creates a new <code>.aes256</code> file without changing the original.</li>
             </ol>
             <div class="folder-field-label mt-2">1. Check that OpenSSL is installed</div>
             <div class="code-copy-row">
@@ -105,40 +97,18 @@ export function renderEncryption(container) {
     </div>
   `;
 
-  const filePicker = container.querySelector('#encryption-file-picker');
-  const browseFileBtn = container.querySelector('#btn-browse-encryption-file');
-  browseFileBtn?.addEventListener('click', () => {
-    filePicker?.click();
-  });
-
-  filePicker?.addEventListener('change', () => {
-    const selectedFile = filePicker.files?.[0];
-    if (!selectedFile) return;
-
-    container._encryptionGuide = {
-      targetFile: selectedFile.name,
-      password: container.querySelector('#encryption-password')?.value || '',
-      checkCommand: '',
-      protectCommand: ''
-    };
-    sound.playClick();
-    renderEncryption(container);
-  });
-
   const generateBtn = container.querySelector('#btn-generate-encryption-guide');
   generateBtn?.addEventListener('click', () => {
-    const targetFile = container.querySelector('#encryption-target-file')?.value || '';
     const password = container.querySelector('#encryption-password')?.value || '';
 
-    if (!targetFile || !password) {
-      window.alert('Enter both a target file path and a password.');
+    if (!password) {
+      window.alert('Enter a password before generating the commands.');
       return;
     }
 
     container._encryptionGuide = {
-      targetFile,
       password,
-      ...buildTerminalCommands(targetFile, password)
+      ...buildTerminalCommands(password)
     };
     sound.playClick();
     renderEncryption(container);
@@ -162,17 +132,12 @@ export function renderEncryption(container) {
   });
 }
 
-function buildTerminalCommands(targetFile, password) {
+function buildTerminalCommands(password) {
   const secret = shellQuote(password);
 
   return {
     checkCommand: 'openssl version',
-    protectCommand: `FILE=$(find ~ -type f -name ${shellQuote(targetFile)} -print -quit 2>/dev/null)
-if [ -z "$FILE" ]; then
-  echo "File not found: ${shellQuote(targetFile)}"
-  exit 1
-fi
-openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in "$FILE" -out "$FILE.aes256" -pass pass:${secret}`
+    protectCommand: `openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in "$HOME/Downloads/${COURSE_OUTLINE_FILE}" -out "$HOME/Downloads/${COURSE_OUTLINE_FILE}.aes256" -pass pass:${secret}`
   };
 }
 

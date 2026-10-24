@@ -12,7 +12,7 @@ export function renderEncryption(container) {
   const values = container._encryptionGuide || {
     password: DEFAULT_PASSWORD,
     checkCommand: '',
-    protectCommand: ''
+    protectCommands: []
   };
 
   container.innerHTML = `
@@ -54,7 +54,7 @@ export function renderEncryption(container) {
         </div>
       </div>
 
-      ${values.checkCommand && values.protectCommand ? `
+      ${values.checkCommand && values.protectCommands?.length === 3 ? `
         <div class="cyber-panel mt-3 animate-fade-in">
           <div class="panel-header">
             <div class="panel-title">
@@ -66,18 +66,24 @@ export function renderEncryption(container) {
             <ol class="guide-steps">
               <li>Open Terminal on macOS/Linux, or use a shell with OpenSSL installed.</li>
               <li>Run the check command first, then run the protection command.</li>
-              <li>The protection command reads the downloaded file from <code>~/Downloads</code> and creates a new <code>.aes256</code> file without changing the original.</li>
+              <li>Run each protection command in order. The original PDF remains available as a safety copy.</li>
             </ol>
             <div class="folder-field-label mt-2">1. Check that OpenSSL is installed</div>
             <div class="code-copy-row">
               <textarea id="openssl-check-command" class="cyber-textarea font-mono" rows="2" readonly aria-label="OpenSSL check command">${escapeHtml(values.checkCommand)}</textarea>
               <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="openssl-check-command">Copy</button>
             </div>
-            <div class="folder-field-label mt-2">2. Locate and encrypt the selected file</div>
-            <div class="code-copy-row">
-              <textarea id="protect-file-command" class="cyber-textarea font-mono" rows="6" readonly aria-label="File location and encryption command">${escapeHtml(values.protectCommand)}</textarea>
-              <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="protect-file-command">Copy</button>
-            </div>
+            ${values.protectCommands.map((command, index) => `
+              <div class="folder-field-label mt-2">${index + 2}. ${[
+                'Encrypt to a temporary file',
+                'Verify the temporary file',
+                'Create the final encrypted copy'
+              ][index]}</div>
+              <div class="code-copy-row">
+                <textarea id="protect-command-${index}" class="cyber-textarea font-mono" rows="${index === 1 ? 2 : 3}" readonly aria-label="Protection command ${index + 1}">${escapeHtml(command)}</textarea>
+                <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="protect-command-${index}">Copy</button>
+              </div>
+            `).join('')}
           </div>
         </div>
       ` : ''}
@@ -141,10 +147,17 @@ export function renderEncryption(container) {
 
 function buildTerminalCommands(password) {
   const secret = shellQuote(password);
+  const input = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}"`;
+  const temporaryOutput = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}.enc.tmp"`;
+  const encryptedCopy = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}.enc"`;
 
   return {
     checkCommand: 'openssl version',
-    protectCommand: `openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in "$HOME/Downloads/${COURSE_OUTLINE_FILE}" -out "$HOME/Downloads/${COURSE_OUTLINE_FILE}.aes256" -pass pass:${secret}`
+    protectCommands: [
+      `openssl enc -aes-256-cbc -pbkdf2 -salt -pass pass:${secret} -in ${input} -out ${temporaryOutput}`,
+      `ls -l ${temporaryOutput}`,
+      `mv ${temporaryOutput} ${encryptedCopy}`
+    ]
   };
 }
 

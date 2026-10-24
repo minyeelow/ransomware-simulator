@@ -2623,6 +2623,8 @@ body::before {
 }
 
 .btn-primary-confirm {
+  display: inline-flex;
+  align-items: center;
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-medium);
   color: var(--text-primary);
@@ -2632,7 +2634,12 @@ body::before {
   white-space: nowrap;
   font-weight: 600;
   font-size: 12px;
+  line-height: 1.4;
   transition: all var(--trans-fast);
+}
+
+.panel-body > .btn-primary-confirm {
+  margin-top: 8px;
 }
 
 .btn-primary-confirm:hover {

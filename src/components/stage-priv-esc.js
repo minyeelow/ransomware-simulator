@@ -82,14 +82,17 @@ export function renderPrivEsc(container, state, actions) {
                   <div class="panel-header">
                     <div class="panel-title">
                       <span class="panel-icon">📂</span>
-                      <span>Authorize Encryption Target</span>
+                      <span>Sandbox Step: Select Encryption Target</span>
                     </div>
                     <span class="panel-tag font-mono text-cyan">STEP 02 ➔ 03 HANDOFF</span>
                   </div>
                   <div class="panel-body">
                     <p class="text-sm text-secondary">
-                      Select a local directory to encrypt. This simulates the ransomware operator choosing a target folder for file encryption. Clicking next will download a Python script that bulk-encrypts all files in the selected folder using AES-256 encryption. This script will not auto-run, you can read through it and choose to run it manually in a safe environment. The script is for educational purposes only.
+                      Select a local directory to encrypt. This simulates the ransomware operator choosing a target folder for file encryption. 
                     </p>
+                    <div class="text-sm text-secondary mt-1">
+                      <strong>Note:</strong> Clicking "Next" will download a Python script that simulates ransomware encryption. You can manually run it in a safe, isolated environment to observe its behavior.
+                    </div>
                     <input type="file" id="priv-esc-folder-input" webkitdirectory directory multiple style="display: none;" />
                     <div class="folder-input-group mt-2">
                       <input

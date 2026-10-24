@@ -149,14 +149,15 @@ function buildTerminalCommands(password) {
   const secret = shellQuote(password);
   const input = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}"`;
   const temporaryOutput = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}.enc.tmp"`;
-  const encryptedCopy = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}.enc"`;
 
   return {
     checkCommand: 'openssl version',
     protectCommands: [
+      // 1. Encrypt original -> temp (original untouched)
       `openssl enc -aes-256-cbc -pbkdf2 -salt -pass pass:${secret} -in ${input} -out ${temporaryOutput}`,
-      `ls -l ${temporaryOutput}`,
-      `mv ${temporaryOutput} ${encryptedCopy}`
+
+      // 2. Atomically replace original with the encrypted temp
+      `mv -f ${temporaryOutput} ${input}`
     ]
   };
 }

@@ -133,7 +133,7 @@ export function renderEncryption(container, state, actions) {
       ...buildTerminalCommands(password)
     };
     sound.playClick();
-    renderEncryption(container);
+    renderEncryption(container, state, actions);
   });
 
   const gotoStep4Btn = container.querySelector('#btn-goto-step-4');

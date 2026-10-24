@@ -2962,3 +2962,253 @@ body::before {
   width: 14px;
   height: 14px;
 }
+
+/* ==========================================================================
+   WINDOWS PRIVILEGE EXECUTION / UAC POP-UP STYLES
+   ========================================================================== */
+.uac-stage-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0 20px 0;
+}
+
+.windows-uac-dialog {
+  width: 100%;
+  max-width: 640px;
+  background: #202020;
+  border: 1px solid #3E3E3E;
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  transition: all var(--trans-base);
+}
+
+.windows-uac-dialog.uac-elevated {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 24px rgba(16, 185, 129, 0.2);
+}
+
+.uac-titlebar {
+  background: #181818;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.uac-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uac-shield-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.uac-title-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #CCCCCC;
+}
+
+.uac-window-controls {
+  display: flex;
+  align-items: center;
+}
+
+.uac-ctrl-btn {
+  font-size: 11px;
+  color: #888888;
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: default;
+}
+
+.uac-body {
+  padding: 24px 28px;
+  background: #242424;
+}
+
+.uac-headline {
+  font-size: 16px;
+  font-weight: 600;
+  color: #FFFFFF;
+  line-height: 1.45;
+  margin-bottom: 18px;
+}
+
+.uac-app-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #1C1C1C;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.uac-app-icon {
+  font-size: 28px;
+}
+
+.uac-app-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.uac-app-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.uac-field {
+  display: flex;
+  gap: 6px;
+  color: #999999;
+}
+
+.uac-label {
+  color: #777777;
+}
+
+.uac-details-expander {
+  margin-bottom: 12px;
+  color: #0084FF;
+  cursor: pointer;
+}
+
+.uac-summary-link {
+  color: #38BDF8;
+  user-select: none;
+}
+
+.uac-expanded-box {
+  background: #181818;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  padding: 8px 10px;
+  color: #AAAAAA;
+  line-height: 1.6;
+}
+
+.uac-denied-callout {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #E2E8F0;
+  line-height: 1.5;
+}
+
+/* UAC Buttons */
+.uac-buttons-row {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.uac-btn {
+  padding: 8px 24px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+  border: 1px solid transparent;
+}
+
+.uac-btn-yes {
+  background: #0067C0;
+  border-color: #0078D7;
+  color: #FFFFFF;
+}
+
+.uac-btn-yes:hover {
+  background: #0078D7;
+  box-shadow: 0 0 12px rgba(0, 120, 215, 0.4);
+}
+
+.uac-btn-no {
+  background: #333333;
+  border-color: #4A4A4A;
+  color: #FFFFFF;
+}
+
+.uac-btn-no:hover {
+  background: #404040;
+}
+
+.uac-btn-bypass {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #FBBF24;
+  font-size: 11px;
+}
+
+.uac-btn-bypass:hover {
+  background: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 10px var(--accent-amber-glow);
+}
+
+/* UAC Elevation Success State */
+.uac-success-content {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.uac-success-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: var(--accent-emerald);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.success-icon {
+  font-weight: 900;
+}
+
+.uac-prompt-text {
+  max-width: 500px;
+  margin: 8px auto 0 auto;
+  line-height: 1.5;
+}
+
+.uac-token-info {
+  background: #181818;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.token-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.uac-advance-row {
+  display: flex;
+  justify-content: center;
+}

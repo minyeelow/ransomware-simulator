@@ -1,202 +1,172 @@
 /**
  * Stage 2: Privilege Escalation Component
- * Visualizes the elevation ladder from standard domain user to SYSTEM integrity.
+ * Simulates the Windows Privilege Execution / User Account Control (UAC) pop-up dialog.
  */
 import { sound } from '../sound.js';
 
 export function renderPrivEsc(container, state, actions) {
-  const { privEsc, targetHost } = state;
+  const { privEsc, targetHost, initialAccess } = state;
   const isExploited = privEsc.exploited;
+  const downloadedSoftware = initialAccess.downloadedSoftware || 'Adobe Photoshop 2026';
+  const installerExe = `${downloadedSoftware.replace(/[^a-zA-Z0-9]/g, '_')}_Setup.exe`;
+  const deniedState = container._elevationDenied || false;
 
   container.innerHTML = `
     <div class="stage-view-container animate-fade-in" id="stage-priv-esc">
-      <!-- Stage Header -->
-      <div class="stage-header-bar">
-        <div class="stage-title-group">
-          <div class="stage-eyebrow text-amber">STEP 02 OF 05 // SYSTEM ELEVATION</div>
-          <h1 class="stage-main-title">Privilege Escalation</h1>
-          <p class="stage-description">
-            Ransomware cannot terminate antivirus services or delete volume shadow backups as an unprivileged user. 
-            Operators must elevate privileges to local Administrator and <code>NT AUTHORITY\\SYSTEM</code>.
-          </p>
+      
+      <!-- Top Stage Breadcrumb -->
+      <div class="adobe-stage-banner">
+        <div class="stage-eyebrow font-mono text-amber">
+          <span class="pulsing-dot yellow"></span> STEP 02 OF 05 // PRIVILEGE EXECUTION (WINDOWS USER ACCOUNT CONTROL)
         </div>
-        <div class="stage-action-cta">
-          ${isExploited ? `
-            <div class="status-pill status-pill-danger">
-              <span class="pulsing-dot red"></span> Elevated: NT AUTHORITY\\SYSTEM
-            </div>
-          ` : `
-            <button type="button" class="action-btn-primary glow-amber" id="btn-trigger-privesc">
-              <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
-              </svg>
-              <span>Execute Escalation Exploit</span>
-            </button>
-          `}
+        <div class="text-xs text-muted font-mono mt-1">
+          CONTEXT: The downloaded software installer prompts the user for administrative execution rights. 
+          Without elevation, ransomware cannot terminate security mini-filters, stop database services, or wipe Volume Shadow Copies.
         </div>
       </div>
 
-      <!-- Main Escalation Grid -->
-      <div class="stage-split-grid">
-        <!-- Left: Privilege Integrity Ladder -->
-        <div class="cyber-panel">
-          <div class="panel-header">
-            <div class="panel-title">
-              <span class="panel-icon">🪜</span>
-              <span>Windows Integrity Level Ladder</span>
+      <!-- Main UAC Dialog Container Area -->
+      <div class="uac-stage-wrapper mt-3">
+        
+        <!-- Windows UAC Pop-up Window -->
+        <div class="windows-uac-dialog ${isExploited ? 'uac-elevated' : ''}" id="windows-uac-dialog">
+          
+          <!-- UAC Titlebar -->
+          <div class="uac-titlebar">
+            <div class="uac-title-group">
+              <svg class="uac-shield-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z" fill="#0078D7"/>
+                <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91V2z" fill="#FFB900"/>
+              </svg>
+              <span class="uac-title-text">User Account Control</span>
             </div>
-            <span class="panel-tag font-mono">TOKEN PERMISSIONS</span>
-          </div>
-
-          <div class="panel-body">
-            <div class="privilege-ladder">
-              <!-- Tier 3: SYSTEM -->
-              <div class="ladder-tier ${isExploited ? 'tier-current tier-system' : 'tier-locked'}">
-                <div class="tier-indicator">
-                  <span class="tier-dot"></span>
-                </div>
-                <div class="tier-info">
-                  <div class="tier-level-header">
-                    <span class="tier-level-name">Ring 0 // SYSTEM Integrity</span>
-                    <span class="tier-badge ${isExploited ? 'badge-critical' : 'badge-neutral'}">
-                      ${isExploited ? 'ACTIVE USER' : 'TARGET'}
-                    </span>
-                  </div>
-                  <div class="tier-user font-mono">NT AUTHORITY\\SYSTEM</div>
-                  <div class="tier-desc">Unrestricted kernel-level access. Can stop EDR services, unload mini-filter drivers, and wipe volume shadow copies.</div>
-                  <div class="tier-privs font-mono">
-                    Privileges: SeDebugPrivilege, SeTcbPrivilege, SeImpersonatePrivilege
-                  </div>
-                </div>
-              </div>
-
-              <div class="ladder-arrow-down ${isExploited ? 'active-arrow' : ''}">▲ ELEVATION PATH ▲</div>
-
-              <!-- Tier 2: Local Admin (High Integrity) -->
-              <div class="ladder-tier ${isExploited ? 'tier-passed' : 'tier-elevatable'}">
-                <div class="tier-indicator">
-                  <span class="tier-dot"></span>
-                </div>
-                <div class="tier-info">
-                  <div class="tier-level-header">
-                    <span class="tier-level-name">High Integrity // Local Admin</span>
-                    <span class="tier-badge badge-warn">UAC BYPASSED</span>
-                  </div>
-                  <div class="tier-user font-mono">CORP-FIN-SRV01\\Administrator</div>
-                  <div class="tier-desc">UAC bypass executed via registry hijacking (fodhelper.exe or computerdefaults.exe) without prompting the user.</div>
-                </div>
-              </div>
-
-              <div class="ladder-arrow-down">▲ INGRESS BASELINE ▲</div>
-
-              <!-- Tier 1: Standard User (Medium Integrity) -->
-              <div class="ladder-tier ${isExploited ? 'tier-passed' : 'tier-current'}">
-                <div class="tier-indicator">
-                  <span class="tier-dot"></span>
-                </div>
-                <div class="tier-info">
-                  <div class="tier-level-header">
-                    <span class="tier-level-name">Medium Integrity // Standard User</span>
-                    <span class="tier-badge badge-neutral">${isExploited ? 'ESCALATED AWAY' : 'INITIAL STATE'}</span>
-                  </div>
-                  <div class="tier-user font-mono">MEGACORP\\jsmith (Domain User)</div>
-                  <div class="tier-desc">Limited to user profile folders. Cannot alter system files, services, or registry hives.</div>
-                </div>
-              </div>
+            <div class="uac-window-controls">
+              <span class="uac-ctrl-btn">✕</span>
             </div>
           </div>
-        </div>
 
-        <!-- Right: Memory Dump & Token Impersonation Terminal -->
-        <div class="cyber-panel">
-          <div class="panel-header">
-            <div class="panel-title">
-              <span class="panel-icon">💻</span>
-              <span>Exploit Execution & Credential Dump (Mimikatz)</span>
-            </div>
-            <span class="panel-tag font-mono ${isExploited ? 'tag-danger' : 'tag-neutral'}">
-              ${isExploited ? 'EXPLOIT ARMED' : 'WAITING FOR TRIGGER'}
-            </span>
-          </div>
-
-          <div class="panel-body execution-body">
-            <div class="code-snippet exploit-terminal font-mono">
-              <div class="terminal-line"><span class="prompt-sym">C:\\Temp&gt;</span> whoami /priv</div>
-              <div class="terminal-line text-muted">PRIVILEGES INFORMATION: Standard token [SeChangeNotifyPrivilege Enabled]</div>
-              <div class="terminal-line"><span class="prompt-sym">C:\\Temp&gt;</span> invoke-printspoofer.exe -i -c "cmd.exe"</div>
-              
-              ${isExploited ? `
-                <div class="terminal-line text-amber">[+] Found token: NT AUTHORITY\\SYSTEM with SeImpersonatePrivilege</div>
-                <div class="terminal-line text-amber">[+] Spawning named pipe listener: \\\\.\\pipe\\spoolss</div>
-                <div class="terminal-line text-amber">[+] ImpersonateLoggedOnUser successful! Process integrity: SYSTEM</div>
-                <div class="terminal-line text-emerald">[+] Dumping LSASS memory hashes via comsvcs.dll mini-dump...</div>
-                <div class="terminal-line text-cyan">[!] NTLM HASH EXTRACTED:</div>
-                <div class="terminal-line text-highlight">  User: DomainAdmin_SVC</div>
-                <div class="terminal-line text-highlight">  Hash: 31d6cfe0d16ae931b73c59d7e0c089c0</div>
-                <div class="terminal-line text-emerald">[✓] Full domain administrative delegation obtained!</div>
-              ` : `
-                <div class="terminal-line text-muted">[i] Awaiting exploit execution command... Click "Execute Escalation Exploit" above.</div>
-              `}
-            </div>
-
-            <!-- Privilege Token Inspection Box -->
-            <div class="token-inspection-card">
-              <div class="token-title font-mono">ACTIVE PROCESS SECURITY DESCRIPTOR</div>
-              <div class="token-grid font-mono">
-                <div class="token-cell">
-                  <span class="token-k">Identity:</span>
-                  <span class="token-v ${isExploited ? 'text-danger' : ''}">${targetHost.currentUser}</span>
-                </div>
-                <div class="token-cell">
-                  <span class="token-k">Integrity:</span>
-                  <span class="token-v ${isExploited ? 'text-amber' : ''}">${targetHost.integrityLevel}</span>
-                </div>
-                <div class="token-cell">
-                  <span class="token-k">Elevation:</span>
-                  <span class="token-v ${isExploited ? 'text-danger' : ''}">${isExploited ? 'Full Token (TokenElevationTypeFull)' : 'Limited (TokenElevationTypeLimited)'}</span>
-                </div>
-                <div class="token-cell">
-                  <span class="token-k">Audit Event:</span>
-                  <span class="token-v">${isExploited ? 'Event 4672 (Special Privileges)' : 'Event 4624 (Type 3)'}</span>
-                </div>
-              </div>
-            </div>
-
+          <!-- UAC Main Body -->
+          <div class="uac-body">
+            
             ${isExploited ? `
-              <div class="stage-next-action-row">
-                <button type="button" class="btn-next-step" id="btn-goto-step-3">
-                  <span>Advance to Step 3: Encryption Engine</span>
-                  <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                  </svg>
-                </button>
+              <!-- Elevation Success State -->
+              <div class="uac-success-content animate-fade-in">
+                <div class="uac-success-badge">
+                  <span class="success-icon">✓</span>
+                  <span>ADMINISTRATIVE PRIVILEGES GRANTED</span>
+                </div>
+                <h3 class="uac-headline text-emerald mt-2">Elevated: NT AUTHORITY\\SYSTEM</h3>
+                <p class="uac-prompt-text text-sm text-secondary">
+                  The process token has been elevated to <strong>High / SYSTEM Integrity</strong>. 
+                  The payload now has kernel-level permissions to unload antivirus drivers, kill database locks, and delete system recovery points.
+                </p>
+
+                <div class="uac-token-info font-mono text-xs mt-3">
+                  <div class="token-row">
+                    <span class="token-k">Elevated Token:</span>
+                    <span class="token-v text-danger">${targetHost.currentUser}</span>
+                  </div>
+                  <div class="token-row">
+                    <span class="token-k">Integrity Level:</span>
+                    <span class="token-v text-amber">${targetHost.integrityLevel}</span>
+                  </div>
+                  <div class="token-row">
+                    <span class="token-k">Privileges:</span>
+                    <span class="token-v text-cyan">SeDebugPrivilege, SeTcbPrivilege, SeImpersonatePrivilege</span>
+                  </div>
+                </div>
+
+                <div class="uac-advance-row mt-4">
+                  <button type="button" class="action-btn-primary glow-red btn-large" id="btn-goto-step-3">
+                    <span>Proceed to Step 3: Encryption Engine</span>
+                    <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-            ` : ''}
+            ` : `
+              <!-- Initial UAC Pop-up Question -->
+              <h2 class="uac-headline">
+                Do you want to allow this app from an unknown publisher to make changes to your device?
+              </h2>
+
+              <!-- Target App Details Card -->
+              <div class="uac-app-card">
+                <div class="uac-app-icon">
+                  <span>⚙️</span>
+                </div>
+                <div class="uac-app-meta">
+                  <div class="uac-app-name font-mono">${installerExe}</div>
+                  <div class="uac-field font-mono text-xs">
+                    <span class="uac-label">Publisher:</span>
+                    <span class="uac-val text-amber">Unknown Publisher (Untrusted Certificate)</span>
+                  </div>
+                  <div class="uac-field font-mono text-xs">
+                    <span class="uac-label">File origin:</span>
+                    <span class="uac-val">${state.targetFolder.path || 'Hard drive on this computer'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Collapsible Details Toggle -->
+              <details class="uac-details-expander font-mono text-xs">
+                <summary class="uac-summary-link">Show more details</summary>
+                <div class="uac-expanded-box mt-1">
+                  <div><strong>CLSID:</strong> {F08A28E0-9B2D-441F-B192-3A67C4148B92}</div>
+                  <div><strong>Command:</strong> "C:\\Users\\Target\\Downloads\\${installerExe}" /elevate</div>
+                  <div><strong>Hash:</strong> SHA256: 3a9f02c7810b42f...e08a</div>
+                </div>
+              </details>
+
+              ${deniedState ? `
+                <div class="uac-denied-callout font-mono text-xs mt-2 animate-fade-in">
+                  <strong class="text-amber">⚠️ Elevation Blocked:</strong> In normal scenarios, clicking "No" halts execution. 
+                  However, ransomware operators also deploy silent <strong>UAC Bypass exploits</strong> (e.g. <code>fodhelper.exe</code> or <code>computerdefaults.exe</code>) to elevate automatically without prompting.
+                </div>
+              ` : ''}
+
+              <!-- UAC Buttons: Yes and No -->
+              <div class="uac-buttons-row mt-4">
+                <button type="button" class="uac-btn uac-btn-yes" id="btn-uac-yes">
+                  <span>Yes</span>
+                </button>
+                <button type="button" class="uac-btn uac-btn-no" id="btn-uac-no">
+                  <span>No</span>
+                </button>
+                ${deniedState ? `
+                  <button type="button" class="uac-btn uac-btn-bypass font-mono" id="btn-uac-bypass">
+                    <span>⚡ Simulate UAC Bypass Exploit</span>
+                  </button>
+                ` : ''}
+              </div>
+            `}
+
           </div>
         </div>
       </div>
 
       <!-- Blue Team Mitigation Reference -->
-      <div class="cyber-panel defense-panel">
+      <div class="cyber-panel defense-panel mt-4">
         <div class="panel-header">
           <div class="panel-title">
             <span class="panel-icon">🛡️</span>
-            <span>Blue Team Defenses: Neutralizing Privilege Escalation</span>
+            <span>Blue Team Defenses: Defeating Privilege Escalation &amp; UAC Bypasses</span>
           </div>
           <span class="defense-badge font-mono">HARDENING CONTROLS</span>
         </div>
         <div class="panel-body defense-body">
           <div class="defense-card">
+            <div class="defense-title">Set UAC to "Always Notify"</div>
+            <div class="defense-desc">Setting UAC to highest security slider prevents auto-elevation of Windows built-in binaries (mitigates fodhelper &amp; eventvwr registry bypasses).</div>
+          </div>
+          <div class="defense-card">
+            <div class="defense-title">Standard User Accounts by Default</div>
+            <div class="defense-desc">Do not give daily corporate users local Administrator group membership. When UAC pops up, it requires separate admin credentials rather than just clicking "Yes".</div>
+          </div>
+          <div class="defense-card">
             <div class="defense-title">Enable Windows Credential Guard</div>
-            <div class="defense-desc">Isolates LSASS memory within a Virtualization-based Security (VBS) enclave to prevent memory dumping tools like Mimikatz.</div>
-          </div>
-          <div class="defense-card">
-            <div class="defense-title">LAPS (Local Admin Password Solution)</div>
-            <div class="defense-desc">Rotates randomized, unique passwords for local admin accounts across every endpoint so lateral movement fails.</div>
-          </div>
-          <div class="defense-card">
-            <div class="defense-title">Restrict SeImpersonatePrivilege</div>
-            <div class="defense-desc">Remove impersonation rights from standard service accounts and prevent non-admin users from creating elevated tokens.</div>
+            <div class="defense-desc">Isolates LSASS memory within Virtualization-based Security (VBS) to prevent token theft and pass-the-hash attacks even if elevated.</div>
           </div>
         </div>
       </div>
@@ -204,14 +174,36 @@ export function renderPrivEsc(container, state, actions) {
   `;
 
   // Attach Event Handlers
-  const triggerBtn = container.querySelector('#btn-trigger-privesc');
-  if (triggerBtn) {
-    triggerBtn.addEventListener('click', () => {
+
+  // 1. UAC "Yes" Click Handler
+  const yesBtn = container.querySelector('#btn-uac-yes');
+  if (yesBtn) {
+    yesBtn.addEventListener('click', () => {
       sound.playElevation();
       actions.onTriggerPrivEsc();
     });
   }
 
+  // 2. UAC "No" Click Handler
+  const noBtn = container.querySelector('#btn-uac-no');
+  if (noBtn) {
+    noBtn.addEventListener('click', () => {
+      sound.playClick();
+      container._elevationDenied = true;
+      renderPrivEsc(container, state, actions);
+    });
+  }
+
+  // 3. UAC Bypass button
+  const bypassBtn = container.querySelector('#btn-uac-bypass');
+  if (bypassBtn) {
+    bypassBtn.addEventListener('click', () => {
+      sound.playElevation();
+      actions.onTriggerPrivEsc();
+    });
+  }
+
+  // 4. Advance to Step 3 (Encryption)
   const gotoStep3Btn = container.querySelector('#btn-goto-step-3');
   if (gotoStep3Btn) {
     gotoStep3Btn.addEventListener('click', () => {

@@ -1,8 +1,7 @@
 /**
  * Stage 1: Initial Access Component
- * Simulates a cloned Adobe Free Trials & Downloads software catalogue.
- * Clicking "Download Free Trial" on any software simulates the drive-by trojan download,
- * executing the initial access reverse shell payload into the targeted environment.
+ * Cloned Adobe Free Trials & Downloads software catalogue.
+ * Clicking "Download Free Trial" automatically proceeds to Step 2 (Privilege Escalation pop-up).
  */
 import { sound } from '../sound.js';
 
@@ -100,9 +99,6 @@ const ADOBE_CATALOGUE = [
 ];
 
 export function renderInitialAccess(container, state, actions) {
-  const { initialAccess } = state;
-  const isTriggered = initialAccess.macroTriggered;
-  const downloadedSoftware = initialAccess.downloadedSoftware || 'Adobe Photoshop 2026';
   const activeCategory = container._activeCategory || 'all';
 
   const filteredApps = ADOBE_CATALOGUE.filter(app => {
@@ -116,11 +112,11 @@ export function renderInitialAccess(container, state, actions) {
       <!-- Top Stage Breadcrumb & Attack Vector Meta -->
       <div class="adobe-stage-banner">
         <div class="stage-eyebrow font-mono">
-          <span class="pulsing-dot red"></span> STEP 01 OF 05 // INITIAL ACCESS: TROJANIZED SOFTWARE LURE (MITRE T1204.002)
+          <span class="pulsing-dot red"></span> STEP 01 OF 05 // INITIAL ACCESS: TROJANIZED SOFTWARE TRIAL LURE (MITRE T1204.002)
         </div>
         <div class="text-xs text-muted font-mono mt-1">
           CONTEXT: Threat actors clone legitimate vendor download portals and purchase search engine ads (Malvertising). 
-          When an employee downloads a free trial, the installer drops an obfuscated reverse shell beacon.
+          Clicking "Download Free Trial" on any application initiates the malicious download and proceeds to the installer execution prompt.
         </div>
       </div>
 
@@ -163,43 +159,6 @@ export function renderInitialAccess(container, state, actions) {
           </button>
         </div>
       </div>
-
-      <!-- Infiltration Alert Banner (Shown once user clicked any download) -->
-      ${isTriggered ? `
-        <div class="ingress-alert-card animate-fade-in mt-3">
-          <div class="ingress-header">
-            <div class="ingress-status-pill font-mono">
-              <span class="pulsing-dot red"></span> TROJAN INGRESS EXECUTED
-            </div>
-            <span class="text-xs font-mono text-muted">TARGET: ${state.targetFolder.path || 'Local Directory'}</span>
-          </div>
-
-          <div class="ingress-body">
-            <div class="ingress-title font-mono text-danger">
-              ⚠️ Ingress Vector Detonated: ${downloadedSoftware} Installer
-            </div>
-            <p class="ingress-desc text-xs text-secondary mt-1">
-              The downloaded <code>${downloadedSoftware.replace(/\s+/g, '_')}_Setup.exe</code> executed a hidden PowerShell dropper.
-              Outbound TLS reverse beacon established to C2 server <code>${initialAccess.c2Server}</code>.
-            </p>
-
-            <div class="ingress-meta-row font-mono text-xs mt-2">
-              <span class="text-muted">C2 Beacon: <strong class="text-cyan">${initialAccess.beaconId}</strong></span>
-              <span class="text-muted">Process: <strong class="text-amber">powershell.exe -w hidden (PID 4892)</strong></span>
-              <span class="text-muted">Integrity: <strong class="text-highlight">MEGACORP\\jsmith (Std Token)</strong></span>
-            </div>
-
-            <div class="ingress-action-row mt-3">
-              <button type="button" class="action-btn-primary glow-amber" id="btn-advance-to-step2">
-                <span>Advance to Step 2: Privilege Escalation</span>
-                <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      ` : ''}
 
       <!-- Adobe Software Catalogue Grid -->
       <div class="adobe-catalogue-grid mt-3">
@@ -288,12 +247,13 @@ export function renderInitialAccess(container, state, actions) {
 
   // Attach Event Handlers
 
-  // 1. Download Free Trial Button Click Handlers
+  // 1. Download Free Trial Button -> Immediately proceed to Step 2 (Privilege Escalation UAC Pop-up)
   container.querySelectorAll('.btn-download-adobe-trial').forEach(btn => {
     btn.addEventListener('click', () => {
       const softwareName = btn.getAttribute('data-software-name') || 'Adobe Photoshop 2026';
-      sound.playAlert();
+      sound.playClick();
       actions.onTriggerAccess(softwareName);
+      actions.onSelectStage('privilege-escalation');
     });
   });
 
@@ -305,13 +265,4 @@ export function renderInitialAccess(container, state, actions) {
       renderInitialAccess(container, state, actions);
     });
   });
-
-  // 3. Advance to Step 2 Button
-  const advanceBtn = container.querySelector('#btn-advance-to-step2');
-  if (advanceBtn) {
-    advanceBtn.addEventListener('click', () => {
-      sound.playStageChange();
-      actions.onSelectStage('privilege-escalation');
-    });
-  }
 }

@@ -259,7 +259,7 @@ class StateStore {
     this.notify();
   }
 
-  linkTargetFolder(rawPath) {
+  linkTargetFolder(rawPath, { transitionToInitialAccess = true } = {}) {
     const cleaned = (rawPath || '').trim();
     if (!cleaned) return false;
 
@@ -282,8 +282,10 @@ class StateStore {
 
     this.addTelemetry('FileSystem', 'SUCCESS', `Target directory pointer linked: ${cleaned}`);
     
-    // Automatically transition to Step 1: Initial Access once local linked!
-    this.state.currentStageId = 'initial-access';
+    // Initial setup starts the workflow; later relinking keeps the current stage.
+    if (transitionToInitialAccess) {
+      this.state.currentStageId = 'initial-access';
+    }
     this.notify();
     return true;
   }

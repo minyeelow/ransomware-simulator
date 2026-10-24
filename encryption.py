@@ -45,7 +45,7 @@ def bulk_encrypt_folder(target_folder: str, password: str):
 # 3. Run this script
 
 if __name__ == "__main__":
-    FOLDER_TO_ENCRYPT = r"C:\path\to\your\folder" 
+    FOLDER_TO_ENCRYPT = input("Enter the folder path to encrypt: ").strip()
     SECRET_PASSWORD = "YourSecurePasswordHere"
     
     # Warning check before running

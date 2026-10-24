@@ -34,8 +34,8 @@ const actions = {
     store.setCurrentStage(stageId);
   },
 
-  onLinkFolder: (path) => {
-    store.linkTargetFolder(path);
+  onLinkFolder: (path, options) => {
+    store.linkTargetFolder(path, options);
   },
 
   onUnlinkFolder: () => {

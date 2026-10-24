@@ -3,9 +3,10 @@
  * Simulates the Windows Privilege Execution / User Account Control (UAC) pop-up dialog.
  */
 import { sound } from '../sound.js';
+import { openLocalDirectoryPicker } from '../folderPicker.js';
 
 export function renderPrivEsc(container, state, actions) {
-  const { privEsc, targetHost, initialAccess } = state;
+  const { privEsc, targetHost, initialAccess, targetFolder } = state;
   const isExploited = privEsc.exploited;
   const downloadedSoftware = initialAccess.downloadedSoftware || 'Adobe Photoshop 2026';
   const installerExe = `${downloadedSoftware.replace(/[^a-zA-Z0-9]/g, '_')}_Setup.exe`;
@@ -76,8 +77,41 @@ export function renderPrivEsc(container, state, actions) {
                   </div>
                 </div>
 
+                <div class="cyber-panel mt-4">
+                  <div class="panel-header">
+                    <div class="panel-title">
+                      <span class="panel-icon">📂</span>
+                      <span>Authorize Encryption Target</span>
+                    </div>
+                    <span class="panel-tag font-mono text-cyan">STEP 02 ➔ 03 HANDOFF</span>
+                  </div>
+                  <div class="panel-body">
+                    <p class="text-sm text-secondary">
+                      Select the local directory that the next simulation stage will enumerate.
+                      The browser records only the folder pointer; it does not upload files.
+                    </p>
+                    <input type="file" id="priv-esc-folder-input" webkitdirectory directory multiple style="display: none;" />
+                    <div class="folder-input-group mt-2">
+                      <input
+                        type="text"
+                        id="priv-esc-folder-path"
+                        class="folder-path-input font-mono ${targetFolder?.isLinked ? 'input-linked' : ''}"
+                        value="${escapeHtml(targetFolder?.path || '')}"
+                        placeholder="Select folder or type path..."
+                        aria-label="Encryption target folder path"
+                      />
+                      <button type="button" class="btn-browse-folder" id="btn-priv-esc-browse-folder">
+                        <span>Browse</span>
+                      </button>
+                    </div>
+                    <div class="text-xs font-mono ${targetFolder?.isLinked ? 'text-emerald' : 'text-amber'} mt-1">
+                      ${targetFolder?.isLinked ? `Target linked: ${escapeHtml(targetFolder.path)}` : 'A target folder is required before Step 3.'}
+                    </div>
+                  </div>
+                </div>
+
                 <div class="uac-advance-row mt-4">
-                  <button type="button" class="action-btn-primary glow-red btn-large" id="btn-goto-step-3">
+                  <button type="button" class="action-btn-primary glow-red btn-large" id="btn-goto-step-3" ${targetFolder?.isLinked ? '' : 'disabled'}>
                     <span>Proceed to Step 3: Encryption Engine</span>
                     <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -173,6 +207,14 @@ export function renderPrivEsc(container, state, actions) {
     </div>
   `;
 
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
   // Attach Event Handlers
 
   // 1. UAC "Yes" Click Handler
@@ -209,6 +251,37 @@ export function renderPrivEsc(container, state, actions) {
     gotoStep3Btn.addEventListener('click', () => {
       sound.playStageChange();
       actions.onSelectStage('encryption');
+    });
+  }
+
+  const folderPathInput = container.querySelector('#priv-esc-folder-path');
+  const folderPickerInput = container.querySelector('#priv-esc-folder-input');
+  const browseFolderBtn = container.querySelector('#btn-priv-esc-browse-folder');
+
+  const linkEncryptionTarget = (path) => {
+    const cleanedPath = (path || '').trim();
+    if (!cleanedPath) return;
+    actions.onLinkFolder(cleanedPath, { transitionToInitialAccess: false });
+  };
+
+  if (browseFolderBtn && folderPickerInput) {
+    browseFolderBtn.addEventListener('click', async () => {
+      sound.playClick();
+      const result = await openLocalDirectoryPicker(folderPickerInput);
+      if (result?.path) {
+        linkEncryptionTarget(result.path);
+      }
+    });
+  }
+
+  if (folderPathInput) {
+    folderPathInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        linkEncryptionTarget(folderPathInput.value);
+      }
+    });
+    folderPathInput.addEventListener('blur', () => {
+      linkEncryptionTarget(folderPathInput.value);
     });
   }
 }

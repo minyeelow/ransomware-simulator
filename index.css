@@ -42,7 +42,6 @@
 
   /* Dimensions */
   --sidebar-width: 350px;
-  --top-nav-height: 56px;
   --terminal-height: 220px;
   --terminal-collapsed-height: 44px;
 
@@ -661,7 +660,7 @@ body::before {
 }
 
 /* ==========================================================================
-   MAIN CONTENT & TOP NAVIGATION
+   MAIN CONTENT
    ========================================================================== */
 .main-content-slot {
   flex: 1;
@@ -671,78 +670,6 @@ body::before {
   overflow: hidden;
   background: var(--bg-darkest);
   position: relative;
-}
-
-.top-nav-bar {
-  height: var(--top-nav-height);
-  min-height: var(--top-nav-height);
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  z-index: 10;
-}
-
-.top-nav-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.environment-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  background: rgba(6, 182, 212, 0.1);
-  border: 1px solid rgba(6, 182, 212, 0.25);
-  border-radius: 20px;
-  color: var(--accent-cyan);
-}
-
-.live-pulse {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent-cyan);
-  box-shadow: 0 0 6px var(--accent-cyan);
-  animation: pulse 1.5s infinite;
-}
-
-.nav-separator {
-  color: var(--border-medium);
-}
-
-.top-nav-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.defense-mode-indicator {
-  display: flex;
-  gap: 6px;
-}
-
-.top-nav-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-medium);
-  color: var(--text-secondary);
-  padding: 5px 12px;
-  border-radius: 4px;
-  text-decoration: none;
-  transition: all var(--trans-fast);
-}
-
-.top-nav-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--accent-cyan);
-  border-color: var(--accent-cyan);
 }
 
 /* ==========================================================================
@@ -2981,26 +2908,6 @@ body.adobe-landing-active::before {
 
 body.adobe-landing-active .main-content-slot {
   background: #f5f5f5;
-}
-
-body.adobe-landing-active .top-nav-bar {
-  background: #ffffff;
-  border-bottom-color: #e5e5e5;
-}
-
-body.adobe-landing-active .environment-badge {
-  background: #f7f7f7;
-  border-color: #d6d6d6;
-  color: #505050;
-}
-
-body.adobe-landing-active .top-nav-scope,
-body.adobe-landing-active .mode-label {
-  color: #6e6e6e;
-}
-
-body.adobe-landing-active .mode-value {
-  color: #2c2c2c;
 }
 
 body.adobe-landing-active .stage-viewport-container {

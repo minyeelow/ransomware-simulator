@@ -90,15 +90,6 @@ const actions = {
 function renderApp(state) {
   document.body.classList.toggle('adobe-landing-active', state.currentStageId === 'initial-access');
 
-  const topScopeEl = document.getElementById('top-nav-scope');
-  if (topScopeEl) {
-    if (state.targetFolder?.isLinked) {
-      topScopeEl.textContent = `TARGET DIR: ${state.targetFolder.path}`;
-    } else {
-      topScopeEl.textContent = `TARGET DIR: [AWAITING LOCAL LINK]`;
-    }
-  }
-
   if (sidebarEl) {
     renderSidebar(sidebarEl, state, actions);
   }

@@ -87,6 +87,6 @@ The left sidebar provides navigation and progress tracking across all five phase
 ## ⚡ Additional Capabilities
 - **Stage-by-stage navigation** with reset and progress tracking.
 - **Copyable terminal instructions** with independent copy buttons.
-- **Static training artifacts** including `IS613CourseOutline.pdf` and `ransomnote.txt`.
+- **Static training artifacts** including `IS613CourseOutline.pdf` and `ransomnoteimage.png`.
 - **Tactical cyber audio engine** powered by the HTML5 Web Audio API, with a mute toggle.
 - **Distinct visual stages**: a light Adobe-style entry page and darker cybersecurity simulation views.

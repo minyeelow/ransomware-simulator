@@ -20,7 +20,7 @@ export function renderEncryption(container, state, actions) {
       <div class="stage-header-bar">
         <div class="stage-title-group">
           <div class="stage-eyebrow text-blue">STEP 03 OF 05 // FILE PROTECTION</div>
-          <h1 class="stage-main-title">How The Encryption Process Works</h1>
+          <h1 class="stage-main-title">What Happens Once You Grant Access</h1>
           <p class="stage-description">
             Let's use a practice file to demonstrate the encryption process. We've provided a sample PDF file for you to download and encrypt. In the real world, ransomware would encrypt your own files, but here we will only work with this practice file.
           </p>

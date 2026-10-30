@@ -218,6 +218,8 @@ export function renderInitialAccess(container, state, actions) {
         }).join('')}
       </div>
 
+    </div>
+  `;
 
   // Attach Event Handlers
 

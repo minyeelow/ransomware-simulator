@@ -211,6 +211,9 @@ q1W2e3R4t5Y6u7I8o9P0a1S2d3F4g5...[SESSION_AES_UNWRAP_VALIDATED]...
         </div>
       </div>
 
+    </div>
+  `;
+
   // Attach Event Handlers
   const triggerBtn = container.querySelector('#btn-trigger-decryption');
   if (triggerBtn) {

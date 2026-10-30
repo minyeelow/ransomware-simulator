@@ -143,6 +143,8 @@ export function renderPrivEsc(container, state, actions) {
         </div>
       </div>
 
+    </div>
+  `;
 
   function escapeHtml(value) {
     return String(value || '')

@@ -120,14 +120,6 @@ export function renderRansom(container, state, actions) {
         </div>
       </div>
 
-      <div class="stage-footer-actions mt-3">
-        <button type="button" class="btn-next-step" id="btn-goto-step-5">
-          <span>Continue to Step 5: Decryption &amp; Incident Remediation</span>
-          <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 010-2h11.586l-2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-          </svg>
-        </button>
-      </div>
     </div>
   `;
 
@@ -160,11 +152,6 @@ export function renderRansom(container, state, actions) {
     }
   });
 
-  const gotoStep5Button = container.querySelector('#btn-goto-step-5');
-  gotoStep5Button?.addEventListener('click', () => {
-    sound.playStageChange();
-    actions.onSelectStage('decryption');
-  });
 }
 
 function escapeHtml(value) {

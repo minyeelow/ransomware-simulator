@@ -9,7 +9,6 @@ import { renderInitialAccess } from './components/stage-initial-access.js';
 import { renderPrivEsc } from './components/stage-priv-esc.js';
 import { renderEncryption } from './components/stage-encryption.js';
 import { renderRansom } from './components/stage-ransom.js';
-import { renderDecryption } from './components/stage-decryption.js';
 
 // DOM container elements
 const sidebarEl = document.getElementById('sidebar-container');
@@ -20,8 +19,7 @@ const STAGE_RENDERERS = {
   'initial-access': renderInitialAccess,
   'privilege-escalation': renderPrivEsc,
   'encryption': renderEncryption,
-  'ransom': renderRansom,
-  'decryption': renderDecryption
+  'ransom': renderRansom
 };
 
 // Application Action Dispatcher
@@ -72,12 +70,6 @@ const actions = {
 
   onSendChat: (text) => {
     store.sendNegotiationChat(text);
-  },
-
-  onStartDecryption: async () => {
-    await store.startDecryption((fileIndex, status) => {
-      sound.playClick();
-    });
   },
 
   onReset: () => {

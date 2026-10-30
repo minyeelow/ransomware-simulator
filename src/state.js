@@ -48,17 +48,6 @@ export const STAGES = [
     color: '#DC2626', // Crimson
     description: 'Displaying extortion notes, locking the desktop, and directing the victim to a Tor onion negotiation portal with timer.'
   },
-  {
-    id: 'decryption',
-    num: 5,
-    title: 'Decryption & Recovery',
-    shortName: 'Decryption',
-    subtitle: 'Key Injection & Forensic Restoration',
-    mitreId: 'T1490-REC',
-    mitreName: 'Incident Recovery & Remediation',
-    color: '#10B981', // Emerald
-    description: 'Injecting the private master RSA key, unwrapping AES keys, restoring files, and validating cryptographic hash integrity.'
-  }
 ];
 
 export const INITIAL_FILES = [

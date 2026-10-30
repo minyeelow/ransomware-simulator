@@ -13,7 +13,7 @@ export function renderSidebar(container, state, actions) {
   // Progress calculation
   const activeStepNum = currentStageIndex >= 0 ? currentStageIndex + 1 : 1;
   const progressPct = Math.round((activeStepNum / STAGES.length) * 100);
-  const progressLabel = `STEP ${activeStepNum} OF 5`;
+  const progressLabel = `STEP ${activeStepNum} OF ${STAGES.length}`;
 
   container.innerHTML = `
     <aside class="sidebar-wrapper" id="sidebar" role="region" aria-label="Ransomware Simulator Navigation">

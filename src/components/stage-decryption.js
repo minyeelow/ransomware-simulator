@@ -211,63 +211,6 @@ q1W2e3R4t5Y6u7I8o9P0a1S2d3F4g5...[SESSION_AES_UNWRAP_VALIDATED]...
         </div>
       </div>
 
-      <!-- Master Ransomware Kill Chain Matrix & Blue Team Defenses -->
-      <div class="cyber-panel defense-panel mt-3">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span class="panel-icon">🛡️</span>
-            <span>Complete Defense Architecture: Stopping Ransomware at Every Stage</span>
-          </div>
-          <span class="defense-badge font-mono">DEFENSE-IN-DEPTH</span>
-        </div>
-        <div class="panel-body defense-body">
-          <div class="matrix-grid">
-            <div class="matrix-col">
-              <div class="matrix-step text-blue font-mono">1. INITIAL ACCESS</div>
-              <ul class="matrix-list text-xs">
-                <li>Enforce FIDO2 Phishing-resistant MFA</li>
-                <li>Block macros via Mark-of-the-Web GPO</li>
-                <li>Patch public VPN/Edge services within 24h</li>
-              </ul>
-            </div>
-            <div class="matrix-col">
-              <div class="matrix-step text-amber font-mono">2. PRIV ESCALATION</div>
-              <ul class="matrix-list text-xs">
-                <li>Deploy Windows Credential Guard (VBS)</li>
-                <li>Enable LAPS for randomized local admin pass</li>
-                <li>Restrict SeImpersonate from service accounts</li>
-              </ul>
-            </div>
-            <div class="matrix-col">
-              <div class="matrix-step text-red font-mono">3. ENCRYPTION</div>
-              <ul class="matrix-list text-xs">
-                <li>Immutable air-gapped backups (WORM storage)</li>
-                <li>EDR behavioral canary file trips</li>
-                <li>Protect volume shadow copy utilities</li>
-              </ul>
-            </div>
-            <div class="matrix-col">
-              <div class="matrix-step text-crimson font-mono">4. EXTORTION</div>
-              <ul class="matrix-list text-xs">
-                <li>DLP and egress traffic bandwidth anomaly alerts</li>
-                <li>Zero-Trust network segmentation (isolate VLANs)</li>
-                <li>Tested Incident Response table-top exercises</li>
-              </ul>
-            </div>
-            <div class="matrix-col">
-              <div class="matrix-step text-emerald font-mono">5. RECOVERY</div>
-              <ul class="matrix-list text-xs">
-                <li>Automated clean snapshot rollback pipeline</li>
-                <li>Active Directory forest recovery runbook</li>
-                <li>Forensic root-cause analysis before restore</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
   // Attach Event Handlers
   const triggerBtn = container.querySelector('#btn-trigger-decryption');
   if (triggerBtn) {

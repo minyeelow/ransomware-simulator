@@ -218,32 +218,6 @@ export function renderInitialAccess(container, state, actions) {
         }).join('')}
       </div>
 
-      <!-- Blue Team Detection Notes -->
-      <div class="cyber-panel defense-panel mt-3">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span class="panel-icon">🛡️</span>
-            <span>Blue Team Defense: Defeating Software Trial Malvertising</span>
-          </div>
-          <span class="defense-badge font-mono">PREVENTION RULE</span>
-        </div>
-        <div class="panel-body defense-body">
-          <div class="defense-card">
-            <div class="defense-title">Block Ad Networks &amp; Search Spoofing</div>
-            <div class="defense-desc">Deploy enterprise DNS filters to block malicious sponsored ad clicks in Google/Bing results targeting creative software keywords.</div>
-          </div>
-          <div class="defense-card">
-            <div class="defense-title">Mandate Application Whitelisting</div>
-            <div class="defense-desc">Use Windows Defender Application Control (WDAC) or AppLocker so unapproved trial installers cannot execute from <code>C:\\Users\\*\\Downloads</code>.</div>
-          </div>
-          <div class="defense-card">
-            <div class="defense-title">Verify Authenticode Digital Signatures</div>
-            <div class="defense-desc">Authentic Adobe installers are signed by <em>Adobe Inc.</em> Threat actor clones either lack digital signatures or use fake root CAs.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
 
   // Attach Event Handlers
 

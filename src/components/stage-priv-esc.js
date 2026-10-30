@@ -143,32 +143,6 @@ export function renderPrivEsc(container, state, actions) {
         </div>
       </div>
 
-      <!-- Blue Team Mitigation Reference -->
-      <div class="cyber-panel defense-panel mt-4">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span class="panel-icon">🛡️</span>
-            <span>Blue Team Defenses: Defeating Privilege Escalation &amp; UAC Bypasses</span>
-          </div>
-          <span class="defense-badge font-mono">HARDENING CONTROLS</span>
-        </div>
-        <div class="panel-body defense-body">
-          <div class="defense-card">
-            <div class="defense-title">Set UAC to "Always Notify"</div>
-            <div class="defense-desc">Setting UAC to highest security slider prevents auto-elevation of Windows built-in binaries (mitigates fodhelper &amp; eventvwr registry bypasses).</div>
-          </div>
-          <div class="defense-card">
-            <div class="defense-title">Standard User Accounts by Default</div>
-            <div class="defense-desc">Do not give daily corporate users local Administrator group membership. When UAC pops up, it requires separate admin credentials rather than just clicking "Yes".</div>
-          </div>
-          <div class="defense-card">
-            <div class="defense-title">Enable Windows Credential Guard</div>
-            <div class="defense-desc">Isolates LSASS memory within Virtualization-based Security (VBS) to prevent token theft and pass-the-hash attacks even if elevated.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
 
   function escapeHtml(value) {
     return String(value || '')

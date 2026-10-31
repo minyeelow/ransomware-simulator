@@ -5,6 +5,7 @@
 import { sound } from '../sound.js';
 
 const DECRYPTION_COMMAND = `openssl pkeyutl -decrypt -inkey "$HOME/Downloads/privatekey(given_after_ransom).pem" -in "$HOME/Downloads/IS613CourseOutline.pdf.key.enc" -out "$HOME/Downloads/IS613CourseOutline.pdf.key" && AES_KEY=$(cat "$HOME/Downloads/IS613CourseOutline.pdf.key") && openssl enc -d -aes-256-cbc -pbkdf2 -pass pass:"$AES_KEY" -in "$HOME/Downloads/IS613CourseOutline.pdf.enc" -out "$HOME/Downloads/IS613CourseOutline_decrypted.pdf"`;
+const WINDOWS_DECRYPTION_COMMAND = `cipher /D "$env:USERPROFILE\\Downloads\\IS613CourseOutline.pdf"; Start-Process "$env:USERPROFILE\\Downloads\\IS613CourseOutline.pdf"`;
 
 export function renderRansom(container, state, actions) {
   const { ransom } = state;
@@ -96,24 +97,27 @@ export function renderRansom(container, state, actions) {
               <div class="panel-header">
                 <div class="panel-title">
                   <span class="panel-icon">🔓</span>
-                  <span>Recovery command</span>
+                  <span>Recovery commands</span>
                 </div>
-                <button type="button" class="btn-primary-confirm" id="btn-copy-decrypt-command">
-                  Copy command
-                </button>
               </div>
               <div class="panel-body">
                 <p class="text-sm text-muted">
-                  Run this locally after confirming that the encrypted practice
-                  file exists in your Downloads folder.
+                  Run the command for your operating system after confirming
+                  that the encrypted practice file exists in your Downloads folder.
                 </p>
-                <textarea
-                  id="ransom-decryption-command"
-                  class="cyber-textarea font-mono mt-2"
-                  rows="5"
-                  readonly
-                  aria-label="Practice file decryption command"
-                >${escapeHtml(DECRYPTION_COMMAND)}</textarea>
+                <div class="folder-field-label mt-2">Mac (Terminal)</div>
+                <div class="code-copy-row">
+                  <textarea id="mac-ransom-decryption-command" class="cyber-textarea font-mono" rows="5" readonly aria-label="Mac practice file decryption command">${escapeHtml(DECRYPTION_COMMAND)}</textarea>
+                  <button type="button" class="btn-primary-confirm copy-decrypt-command-btn" data-copy-target="mac-ransom-decryption-command">Copy</button>
+                </div>
+                <div class="folder-field-label mt-3">Windows (PowerShell)</div>
+                <p class="text-sm text-muted">
+                  Windows includes <code>cipher</code> by default, so no OpenSSL installation is required.
+                </p>
+                <div class="code-copy-row">
+                  <textarea id="windows-ransom-decryption-command" class="cyber-textarea font-mono" rows="3" readonly aria-label="Windows practice file decryption command">${escapeHtml(WINDOWS_DECRYPTION_COMMAND)}</textarea>
+                  <button type="button" class="btn-primary-confirm copy-decrypt-command-btn" data-copy-target="windows-ransom-decryption-command">Copy</button>
+                </div>
               </div>
             </div>
           ` : ''}
@@ -136,9 +140,9 @@ export function renderRansom(container, state, actions) {
     renderRansom(container, state, actions);
   });
 
-  const copyButton = container.querySelector('#btn-copy-decrypt-command');
-  copyButton?.addEventListener('click', async () => {
-    const command = container.querySelector('#ransom-decryption-command');
+  container.querySelectorAll('.copy-decrypt-command-btn').forEach((copyButton) => {
+    copyButton.addEventListener('click', async () => {
+    const command = container.querySelector(`#${copyButton.dataset.copyTarget}`);
     if (!command) return;
 
     try {
@@ -150,6 +154,7 @@ export function renderRansom(container, state, actions) {
       copyButton.textContent = 'Select and copy';
       console.warn('Clipboard access was unavailable:', error);
     }
+    });
   });
 
 }

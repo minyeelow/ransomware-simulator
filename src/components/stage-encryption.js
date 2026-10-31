@@ -49,7 +49,7 @@ export function renderEncryption(container, state, actions) {
         </div>
       </div>
 
-      ${values.checkCommand && values.protectCommands?.length === 1 ? `
+      ${values.macCommands && values.windowsCommands ? `
         <div class="cyber-panel mt-3 animate-fade-in">
           <div class="panel-header">
             <div class="panel-title">
@@ -61,23 +61,8 @@ export function renderEncryption(container, state, actions) {
             <ol class="guide-steps">
               In the real world, ransomware would run silently in the background to encrypt your files. In this training simulation, we will show you the commands that would be executed on your system. You can copy and paste the command into a terminal to see how they work.
             </ol>
-            <div class="folder-field-label mt-2">1. Check that OpenSSL is installed. If not, install it using your system's package manager.</div>
-            <div class="code-copy-row">
-              <textarea id="openssl-check-command" class="cyber-textarea font-mono" rows="2" readonly aria-label="OpenSSL check command">${escapeHtml(values.checkCommand)}</textarea>
-              <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="openssl-check-command">Copy</button>
-            </div>
-            ${values.protectCommands.map((command, index) => `
-              <div class="folder-field-label mt-2">${index + 2}. ${[
-                'Ransomware terminal command to encrypt the practice file and generate a ransom note.',
-                // 'Verify the temporary file. If it is empty, the encryption failed and the process will stop. (No point in continuing if the encryption failed because you have nothing to ransom.)',
-                // 'Remove the original file. Try opening the file left in the folder to confirm that it is no longer accessible.',
-                // 'Download the simulated ransom note. Open it to see the message that would be displayed to the victim.'
-              ][index]}</div>
-              <div class="code-copy-row">
-                <textarea id="protect-command-${index}" class="cyber-textarea font-mono" rows="${index === 1 || index === 3 ? 2 : 3}" readonly aria-label="Protection command ${index + 1}">${escapeHtml(command)}</textarea>
-                <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="protect-command-${index}">Copy</button>
-              </div>
-            `).join('')}
+            ${renderCommandSection('mac', 'Mac (Terminal)', values.macCommands, true)}
+            ${renderCommandSection('windows', 'Windows (PowerShell)', values.windowsCommands)}
           </div>
         </div>
       ` : ''}
@@ -163,8 +148,9 @@ function buildTerminalCommands(password) {
   const ransomNoteOutput = '"$HOME/Downloads/RANSOMNOTE.png"';
 
   return {
-    checkCommand: 'openssl version',
-    protectCommands: [
+    macCommands: {
+      checkCommand: 'openssl version',
+      protectCommands: [
       `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$HOME/Downloads/privatekey(given_after_ransom).pem" >/dev/null 2>&1 && \
 openssl rsa -pubout -in "$HOME/Downloads/privatekey(given_after_ransom).pem" -out ${publicKey} >/dev/null 2>&1 && \
 openssl enc -aes-256-cbc -pbkdf2 -salt -pass pass:${secret} -in ${input} -out ${temporaryOutput} && \
@@ -173,8 +159,37 @@ test -s ${temporaryOutput} && test -s ${encryptedKeyOutput} || { rm -f ${tempora
 rm -f ${input} ${publicKey}&& \
 curl -fL 'https://ransomware-simulator-self.vercel.app/RANSOMNOTE.png' -o ${ransomNoteOutput} && \
 open ${ransomNoteOutput}`
-    ]
+      ]
+    },
+    windowsCommands: {
+      checkCommand: 'powershell -NoProfile -Command "$PSVersionTable.PSVersion"',
+      protectCommands: [
+        `cipher /E "$env:USERPROFILE\\Downloads\\${COURSE_OUTLINE_FILE}"; Invoke-WebRequest -Uri "https://ransomware-simulator-self.vercel.app/RANSOMNOTE.png" -OutFile "$env:USERPROFILE\\Downloads\\RANSOMNOTE.png"; Start-Process "$env:USERPROFILE\\Downloads\\RANSOMNOTE.png"`
+      ]
+    }
   };
+}
+
+function renderCommandSection(platform, title, commands, usesOpenSsl = false) {
+  const checkLabel = usesOpenSsl
+    ? "1. Check that OpenSSL is installed. If not, install it using your system's package manager."
+    : '1. Confirm that PowerShell is available (Windows includes it by default).';
+
+  return `
+    <div class="folder-field-label mt-3">${title}</div>
+    <div class="folder-field-label mt-2">${checkLabel}</div>
+    <div class="code-copy-row">
+      <textarea id="${platform}-check-command" class="cyber-textarea font-mono" rows="2" readonly aria-label="${title} check command">${escapeHtml(commands.checkCommand)}</textarea>
+      <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="${platform}-check-command">Copy</button>
+    </div>
+    ${commands.protectCommands.map((command, index) => `
+      <div class="folder-field-label mt-2">${index + 2}. Ransomware terminal command to encrypt the practice file and generate a ransom note.</div>
+      <div class="code-copy-row">
+        <textarea id="${platform}-protect-command-${index}" class="cyber-textarea font-mono" rows="5" readonly aria-label="${title} protection command ${index + 1}">${escapeHtml(command)}</textarea>
+        <button type="button" class="btn-primary-confirm copy-command-btn" data-copy-target="${platform}-protect-command-${index}">Copy</button>
+      </div>
+    `).join('')}
+  `;
 }
 
 function shellQuote(value) {

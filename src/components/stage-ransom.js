@@ -5,7 +5,33 @@
 import { sound } from '../sound.js';
 
 const DECRYPTION_COMMAND = `openssl pkeyutl -decrypt -inkey "$HOME/Downloads/privatekey(given_after_ransom).pem" -in "$HOME/Downloads/IS613CourseOutline.pdf.key.enc" -out "$HOME/Downloads/IS613CourseOutline.pdf.key" && AES_KEY=$(cat "$HOME/Downloads/IS613CourseOutline.pdf.key") && openssl enc -d -aes-256-cbc -pbkdf2 -pass pass:"$AES_KEY" -in "$HOME/Downloads/IS613CourseOutline.pdf.enc" -out "$HOME/Downloads/IS613CourseOutline_decrypted.pdf"`;
-const WINDOWS_DECRYPTION_COMMAND = `cipher /D "$env:USERPROFILE\\Downloads\\IS613CourseOutline.pdf"; Start-Process "$env:USERPROFILE\\Downloads\\IS613CourseOutline.pdf"`;
+const WINDOWS_DECRYPTION_COMMAND = `$downloads = Join-Path $HOME "Downloads"
+$pdfEnc = Join-Path $downloads "IS613CourseOutline.pdf.enc"
+$keyEnc = Join-Path $downloads "IS613CourseOutline.pdf.key.enc"
+$privKeyFile = Join-Path $downloads "privatekey(given_after_ransom).pem"
+$pdfDec = Join-Path $downloads "IS613CourseOutline.pdf"
+# 1. Recover Passphrase using the RSA Private Key
+$privPem = [System.IO.File]::ReadAllText($privKeyFile)
+$base64 = $privPem -replace "-----BEGIN RSA PRIVATE KEY-----", "" -replace "-----END RSA PRIVATE KEY-----", "" -replace "[\r\n]", ""
+$privBlob = [Convert]::FromBase64String($base64)
+$rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider
+$rsa.ImportCspBlob($privBlob)
+$encPass = [System.IO.File]::ReadAllBytes($keyEnc)
+$passBytes = $rsa.Decrypt($encPass, [System.Security.Cryptography.RSAEncryptionPadding]::Pkcs1)
+$pass = [System.Text.Encoding]::UTF8.GetString($passBytes)
+# 2. Decrypt AES Payload
+$payload = [System.IO.File]::ReadAllBytes($pdfEnc)
+$salt = $payload[8..15]
+$encBytes = $payload[16..($payload.Length - 1)]
+$kdf = New-Object System.Security.Cryptography.Rfc2898DeriveBytes($pass, $salt, 10000, [System.Security.Cryptography.HashAlgorithmName]::SHA1)
+$aes = [System.Security.Cryptography.Aes]::Create()
+$aes.Key = $kdf.GetBytes(32)
+$aes.IV = $kdf.GetBytes(16)
+$aes.Mode = [System.Security.Cryptography.CipherMode]::CBC
+$aes.Padding = [System.Security.Cryptography.PaddingMode]::PKCS7
+$decBytes = $aes.CreateDecryptor().TransformFinalBlock($encBytes, 0, $encBytes.Length)
+[System.IO.File]::WriteAllBytes($pdfDec, $decBytes)
+Write-Host "Passphrase recovered ('$pass') and file successfully decrypted!" -ForegroundColor Green`;
 
 export function renderRansom(container, state, actions) {
   const { ransom } = state;
@@ -112,7 +138,7 @@ export function renderRansom(container, state, actions) {
                 </div>
                 <div class="folder-field-label mt-3">Windows (PowerShell)</div>
                 <p class="text-sm text-muted">
-                  Windows includes <code>cipher</code> by default, so no OpenSSL installation is required.
+                  Windows PowerShell includes the cryptography APIs required for recovery, so no OpenSSL installation is required.
                 </p>
                 <div class="code-copy-row">
                   <textarea id="windows-ransom-decryption-command" class="cyber-textarea font-mono" rows="3" readonly aria-label="Windows practice file decryption command">${escapeHtml(WINDOWS_DECRYPTION_COMMAND)}</textarea>
